@@ -1,101 +1,141 @@
 import 'package:flutter/material.dart';
 
+import '../datos.dart';
+import '../foto.dart';
+import '../main.dart';
+import '../iconos_especie.dart';
 import '../theme.dart';
+import 'animales_page.dart';
+import 'ficha_animal_page.dart';
+import 'historial_page.dart';
+import 'movimientos_page.dart';
+import 'nueva_incidencia_page.dart';
+import 'nuevo_animal_page.dart';
+import 'nuevo_movimiento_page.dart';
+import 'reportes_page.dart';
 
-// shortcut: datos fijos copiados del diseño, conectarlos al modelo real cuando exista.
+/// Animales con actividad más reciente (movimientos/incidencias); si faltan, los últimos registrados.
+List<Animal> inspeccionReciente(int n) {
+  final codigos = <String>{
+    for (final e in eventosDe(null)) e.animal.codigo,
+    for (final a in animales.value.reversed) a.codigo,
+  };
+  return [for (final c in codigos.take(n)) animales.value.firstWhere((a) => a.codigo == c)];
+}
+
 class InicioPage extends StatelessWidget {
   const InicioPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      children: const [
-        _Saludo(),
-        SizedBox(height: 24),
-        _Seccion('Resumen de hato', accion: 'Actualizado hoy'),
-        _Resumen(),
-        SizedBox(height: 24),
-        _Seccion('Accesos rápidos'),
-        _Acceso(
-          icon: Icons.add,
-          iconColor: Colors.white,
-          bg: AppColors.primary,
-          title: 'Agregar animal',
-          subtitle: 'Registro con foto, arete y datos',
-        ),
-        _Acceso(
-          icon: Icons.swap_horiz,
-          iconColor: AppColors.primary,
-          bg: AppColors.primarySoft,
-          title: 'Registrar movimiento',
-          subtitle: 'Ventas, traslados, compras o nacimientos',
-        ),
-        _Acceso(
-          icon: Icons.warning_amber_rounded,
-          iconColor: AppColors.warning,
-          bg: AppColors.dangerSoft,
-          title: 'Reportar incidencia',
-          subtitle: 'Pérdida de arete, golpe o tratamiento',
-        ),
-        SizedBox(height: 12),
-        _Seccion('Inspección reciente', accion: 'Ver todas →'),
-        _Animal(codigo: 'VG-001', nombre: 'Luna', detalle: 'Hembra · Holstein · 3 años', arete: '#2584'),
-        _Animal(codigo: 'VG-002', nombre: 'Rayo', detalle: 'Macho · Pardo Suizo · 2 años', arete: '#3109'),
-      ],
+    return ListenableBuilder(
+      listenable: Listenable.merge([animales, movimientos, incidencias, rancho]),
+      builder: (context, _) {
+        final r = ResumenHato(animales.value, movimientos.value, periodoDelMes(DateTime.now()));
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          children: [
+            _Saludo(rancho.value, r.pendientes),
+            const SizedBox(height: 24),
+            const _Seccion('Resumen de hato', accion: 'Actualizado hoy'),
+            _Resumen(r),
+            const SizedBox(height: 24),
+            const _Seccion('Accesos rápidos'),
+            const _Acceso(
+              icon: Icons.add,
+              iconColor: Colors.white,
+              bg: AppColors.primary,
+              title: 'Agregar animal',
+              subtitle: 'Registro con foto, arete y datos',
+              destino: NuevoAnimalPage.new,
+            ),
+            const _Acceso(
+              icon: Icons.swap_horiz,
+              iconColor: AppColors.primary,
+              bg: AppColors.primarySoft,
+              title: 'Registrar movimiento',
+              subtitle: 'Ventas, traslados, compras o nacimientos',
+              destino: NuevoMovimientoPage.new,
+            ),
+            const _Acceso(
+              icon: Icons.warning_amber_rounded,
+              iconColor: AppColors.warning,
+              bg: AppColors.dangerSoft,
+              title: 'Reportar incidencia',
+              subtitle: 'Pérdida de arete, golpe o tratamiento',
+              destino: NuevaIncidenciaPage.new,
+            ),
+            const SizedBox(height: 12),
+            _Seccion('Inspección reciente', accion: 'Ver todas →', onAccion: () => pestanaActual.value = 1),
+            for (final a in inspeccionReciente(2)) _Animal(a),
+          ],
+        );
+      },
     );
   }
 }
 
-BoxDecoration _card() => BoxDecoration(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: cardShadow,
-    );
+BoxDecoration _card() =>
+    BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), boxShadow: cardShadow);
 
-Widget _chip(String text, {Widget? leading}) => Container(
+Widget _chip(String text, {Widget? leading, Color fg = AppColors.primary, Color bg = AppColors.primarySoft}) =>
+    Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           ?leading,
-          Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+          Text(
+            text,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
+          ),
         ],
       ),
     );
 
 class _Saludo extends StatelessWidget {
-  const _Saludo();
+  const _Saludo(this.rancho, this.pendientes);
+
+  final Rancho rancho;
+  final int pendientes;
 
   @override
   Widget build(BuildContext context) {
+    final fg = pendientes == 0 ? AppColors.primary : AppColors.danger;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'RANCHO SAN JOSÉ',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: AppColors.textMuted),
+                rancho.nombre.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                  color: AppColors.textMuted,
+                ),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
-                'Buen día, Don Juan 👋',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.text),
+                'Buen día, ${rancho.saludo} 👋',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.text),
               ),
             ],
           ),
         ),
         _chip(
-          'Hato al día',
+          pendientes == 0 ? 'Hato al día' : '$pendientes pendientes',
+          fg: fg,
+          bg: pendientes == 0 ? AppColors.primarySoft : AppColors.dangerSoft,
           leading: Container(
             width: 7,
             height: 7,
             margin: const EdgeInsets.only(right: 6),
-            decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
           ),
         ),
       ],
@@ -104,10 +144,11 @@ class _Saludo extends StatelessWidget {
 }
 
 class _Seccion extends StatelessWidget {
-  const _Seccion(this.title, {this.accion});
+  const _Seccion(this.title, {this.accion, this.onAccion});
 
   final String title;
   final String? accion;
+  final VoidCallback? onAccion;
 
   @override
   Widget build(BuildContext context) {
@@ -116,10 +157,23 @@ class _Seccion extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+            ),
           ),
           if (accion != null)
-            Text(accion!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+            InkWell(
+              onTap: onAccion,
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(
+                  accion!,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -127,67 +181,85 @@ class _Seccion extends StatelessWidget {
 }
 
 class _Resumen extends StatelessWidget {
-  const _Resumen();
+  const _Resumen(this.r);
+
+  final ResumenHato r;
 
   static const _muted = TextStyle(fontSize: 13, color: AppColors.textMuted);
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final enfermos = animales.value.where((a) => a.enTratamiento && enHato(a)).toList();
+    return Column(
       children: [
         _FilaStats(
           _Stat(
             label: 'Total animales',
+            filtro: (sexo: null, tratamiento: false),
             icon: Icons.pets,
             iconColor: AppColors.primary,
             iconBg: AppColors.primarySoft,
-            value: Text('24'),
+            value: Text('${r.total}'),
             footer: Row(
               children: [
-                Icon(Icons.check_circle_outline, size: 15, color: AppColors.primary),
-                SizedBox(width: 4),
+                const Icon(Icons.check_circle_outline, size: 15, color: AppColors.primary),
+                const SizedBox(width: 4),
                 Flexible(
-                  child: Text('100% registrados',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                  child: Text(
+                    '${r.pct(r.total - r.sinArete)}% con arete',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
+                  ),
                 ),
               ],
             ),
           ),
           _Stat(
             label: 'Hembras',
+            filtro: (sexo: 'Hembra', tratamiento: false),
             icon: Icons.female,
             iconColor: AppColors.warning,
             iconBg: AppColors.dangerSoft,
-            value: Text('14'),
-            footer: Text('58% del total', style: _muted),
+            value: Text('${r.hembras}'),
+            footer: Text('${r.pct(r.hembras)}% del total', style: _muted),
           ),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         _FilaStats(
           _Stat(
             label: 'Machos',
+            filtro: (sexo: 'Macho', tratamiento: false),
             icon: Icons.male,
             iconColor: AppColors.primary,
             iconBg: AppColors.primarySoft,
-            value: Text('10'),
-            footer: Text('42% del total', style: _muted),
+            value: Text('${r.machos}'),
+            footer: Text('${r.pct(r.machos)}% del total', style: _muted),
           ),
           _Stat(
             label: 'Enfermos',
+            filtro: (sexo: null, tratamiento: true),
             icon: Icons.medical_services,
             iconColor: AppColors.danger,
             iconBg: AppColors.dangerSoft,
             value: Text.rich(
               TextSpan(
-                text: '1 ',
-                style: TextStyle(color: AppColors.danger),
+                text: '${enfermos.length} ',
+                style: TextStyle(color: enfermos.isEmpty ? AppColors.text : AppColors.danger),
                 children: [
-                  TextSpan(text: 'Revisión', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                  if (enfermos.isNotEmpty)
+                    const TextSpan(
+                      text: 'Revisión',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                    ),
                 ],
               ),
             ),
-            footer: Text('VG-004 (Fiebre leve)', style: _muted),
+            footer: Text(
+              enfermos.isEmpty ? 'Sin casos' : enfermos.map((a) => a.codigo).join(', '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _muted,
+            ),
           ),
         ),
       ],
@@ -203,11 +275,15 @@ class _FilaStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [Expanded(child: a), const SizedBox(width: 12), Expanded(child: b)],
-        ),
-      );
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: a),
+        const SizedBox(width: 12),
+        Expanded(child: b),
+      ],
+    ),
+  );
 }
 
 class _Stat extends StatelessWidget {
@@ -218,6 +294,7 @@ class _Stat extends StatelessWidget {
     required this.iconBg,
     required this.value,
     required this.footer,
+    required this.filtro,
   });
 
   final String label;
@@ -226,37 +303,54 @@ class _Stat extends StatelessWidget {
   final Color iconBg;
   final Widget value;
   final Widget footer;
+  final ({String? sexo, bool tratamiento}) filtro; // filtro con el que se abre Animales al tocarla
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
       decoration: _card(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
-              ),
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-                child: Icon(icon, size: 18, color: iconColor),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          DefaultTextStyle.merge(
-            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.text, height: 1.1),
-            child: value,
-          ),
-          const SizedBox(height: 4),
-          footer,
-        ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            pedidoFiltroAnimales.value = filtro;
+            pestanaActual.value = 1;
+          },
+          child: Padding(padding: const EdgeInsets.all(14), child: _contenido()),
+        ),
       ),
+    );
+  }
+
+  Widget _contenido() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+              ),
+            ),
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Icon(icon, size: 18, color: iconColor),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        DefaultTextStyle.merge(
+          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.text, height: 1.1),
+          child: value,
+        ),
+        const SizedBox(height: 4),
+        footer,
+      ],
     );
   }
 }
@@ -268,6 +362,7 @@ class _Acceso extends StatelessWidget {
     required this.bg,
     required this.title,
     required this.subtitle,
+    required this.destino,
   });
 
   final IconData icon;
@@ -275,6 +370,7 @@ class _Acceso extends StatelessWidget {
   final Color bg;
   final String title;
   final String subtitle;
+  final Widget Function() destino; // pantalla que abre
 
   @override
   Widget build(BuildContext context) {
@@ -285,7 +381,7 @@ class _Acceso extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {}, // shortcut: sin destino aún, conectar cuando existan las pantallas.
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => destino())),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
@@ -301,7 +397,10 @@ class _Acceso extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.text)),
+                      Text(
+                        title,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.text),
+                      ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
@@ -328,60 +427,75 @@ class _Acceso extends StatelessWidget {
 }
 
 class _Animal extends StatelessWidget {
-  const _Animal({required this.codigo, required this.nombre, required this.detalle, required this.arete});
+  const _Animal(this.a);
 
-  final String codigo;
-  final String nombre;
-  final String detalle;
-  final String arete;
+  final Animal a;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
       decoration: _card(),
-      child: Row(
-        children: [
-          // shortcut: ícono en lugar de la foto, usar Image cuando el animal tenga foto.
-          Container(
-            width: 64,
-            height: 56,
-            decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.pets, color: AppColors.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FichaAnimalPage(a))),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '$codigo · $nombre',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                FotoAnimal(a.foto, size: 60),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              a.nombre.isEmpty ? a.codigo : '${a.codigo} · ${a.nombre}',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                            ),
+                          ),
+                          etiquetaSalida(a) != null
+                              ? _chip(etiquetaSalida(a)!, fg: AppColors.textMuted, bg: AppColors.border)
+                              : a.enTratamiento
+                                  ? _chip('En tratamiento', fg: AppColors.danger, bg: AppColors.dangerSoft)
+                                  : _chip('Activo'),
+                        ],
                       ),
-                    ),
-                    _chip('Activo'),
-                  ],
+                      const SizedBox(height: 2),
+                      conIconoEspecie(
+                        a.especie,
+                        Text(
+                          '${a.sexo} · ${a.raza} · ${a.edad}',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(Icons.sell_outlined, size: 13, color: AppColors.textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            a.arete == null ? 'Arete en trámite' : 'Arete #${a.arete}',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 2),
-                Text(detalle, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Icon(Icons.sell_outlined, size: 13, color: AppColors.textMuted),
-                    const SizedBox(width: 4),
-                    Text('Arete $arete', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                  ],
-                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right, color: AppColors.text),
               ],
             ),
           ),
-          const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, color: AppColors.text),
-        ],
+        ),
       ),
     );
   }

@@ -1,6 +1,6 @@
 {
-    "name": "vaca_tec",
-    "short_name": "vaca_tec",
+    "name": "AgroRegister",
+    "short_name": "AgroRegister",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

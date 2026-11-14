@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Colores tomados del diseño de Mi Ganado.
+// Colores tomados del diseño de AgroRegister.
 class AppColors {
   static const primary = Color(0xFF1E5B3F); // verde oscuro (botón "+", nav activo)
   static const primarySoft = Color(0xFFDCEBE3); // verde claro (íconos, banners)
@@ -35,7 +35,7 @@ final appTheme = ThemeData(
   ),
   navigationBarTheme: NavigationBarThemeData(
     backgroundColor: AppColors.surface,
-    indicatorColor: Colors.transparent,
+    indicatorColor: AppColors.primarySoft, // fondo verde claro animado tras la pestaña activa
     surfaceTintColor: Colors.transparent,
     labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     iconTheme: WidgetStateProperty.resolveWith(
@@ -52,3 +52,7 @@ final appTheme = ThemeData(
     ),
   ),
 );
+
+/// Aviso para funciones que aún no están disponibles (exportar PDF, escáner, etc.).
+void avisoProximamente(BuildContext context, String que) => ScaffoldMessenger.of(context)
+    .showSnackBar(SnackBar(content: Text('$que estará disponible en una próxima versión')));

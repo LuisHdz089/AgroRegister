@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 
+import 'datos.dart';
 import 'pages/animales_page.dart';
 import 'pages/inicio_page.dart';
+import 'pages/login_page.dart';
 import 'pages/movimientos_page.dart';
+import 'pages/notificaciones_page.dart';
 import 'pages/perfil_page.dart';
 import 'pages/reportes_page.dart';
 import 'theme.dart';
 
-void main() => runApp(const MiGanadoApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await iniciarDatos();
+  runApp(const MiGanadoApp());
+}
 
 class MiGanadoApp extends StatelessWidget {
   const MiGanadoApp({super.key});
@@ -15,10 +22,13 @@ class MiGanadoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mi Ganado',
+      title: 'AgroRegister',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
-      home: const HomeShell(),
+      home: ValueListenableBuilder(
+        valueListenable: usuarioActual,
+        builder: (_, usuario, _) => usuario == null ? const LoginPage() : const HomeShell(),
+      ),
     );
   }
 }
@@ -30,11 +40,29 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => _HomeShellState();
 }
 
+/// Pestaña visible del menú inferior; otras pantallas la cambian para llevar al usuario a una pestaña.
+final pestanaActual = ValueNotifier(0);
+
 class _HomeShellState extends State<HomeShell> {
-  int _index = 0;
+  int get _index => pestanaActual.value;
 
   static const _titles = ['Inicio', 'Animales', 'Movimientos', 'Reportes'];
   static const _pages = [InicioPage(), AnimalesPage(), MovimientosPage(), ReportesPage()];
+
+  void _refrescar() => setState(() {});
+
+  @override
+  void initState() {
+    super.initState();
+    pestanaActual.value = 0;
+    pestanaActual.addListener(_refrescar);
+  }
+
+  @override
+  void dispose() {
+    pestanaActual.removeListener(_refrescar);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +82,7 @@ class _HomeShellState extends State<HomeShell> {
         ),
         child: NavigationBar(
           selectedIndex: _index,
-          onDestinationSelected: (i) => setState(() => _index = i),
+          onDestinationSelected: (i) => pestanaActual.value = i,
           destinations: const [
             NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Inicio'),
             NavigationDestination(icon: Icon(Icons.pets_outlined), label: 'Animales'),
@@ -67,7 +95,7 @@ class _HomeShellState extends State<HomeShell> {
   }
 }
 
-// Encabezado común: logo, "MI GANADO" + título de la página, avatar.
+// Encabezado común: logo, título de la página y avatar.
 class _Header extends StatelessWidget {
   const _Header({required this.title});
 
@@ -79,33 +107,36 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Row(
         children: [
-          // shortcut: ícono en lugar del logo, cambiar por Image.asset cuando exista el archivo.
-          const Icon(Icons.agriculture, color: AppColors.primary, size: 32),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset('assets/icon/icon.png', width: 36, height: 36, semanticLabel: 'AgroRegister'),
+          ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'MI GANADO',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.text,
-                  ),
-                ),
-              ],
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.text),
             ),
           ),
+          // Campana con el número de avisos de campo pendientes.
+          ListenableBuilder(
+            listenable: cambiosDeAvisos,
+            builder: (context, _) {
+              final n = avisosActuales().length;
+              return IconButton(
+                tooltip: 'Notificaciones',
+                onPressed: () =>
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificacionesPage())),
+                icon: Badge(
+                  isLabelVisible: n > 0,
+                  label: Text(n > 99 ? '99+' : '$n'),
+                  backgroundColor: AppColors.danger,
+                  child: const Icon(Icons.notifications_none, color: AppColors.text, size: 26),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 4),
           Semantics(
             button: true,
             label: 'Perfil',
