@@ -86,7 +86,7 @@ class NotificacionesPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Qué avisarme',
+                    Text('Qué avisarme',
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
                     for (final t in tiposAviso)
                       SwitchListTile(
@@ -109,11 +109,11 @@ class NotificacionesPage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
                 child: Text(
                   avisos.isEmpty ? 'Todo al día' : '${avisos.length} ${avisos.length == 1 ? 'aviso' : 'avisos'}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
                 ),
               ),
               if (avisos.isEmpty)
-                const _Tarjeta(
+                _Tarjeta(
                   child: Row(
                     children: [
                       Icon(Icons.check_circle_outline, color: AppColors.primary),
@@ -186,11 +186,11 @@ class _AvisoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(aviso.titulo,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
                       Text('${a.codigo}${a.nombre.isEmpty ? '' : ' • ${a.nombre}'} — ${aviso.detalle}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                          style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
                     ],
                   ),
                 ),

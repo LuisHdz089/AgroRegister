@@ -89,14 +89,14 @@ class MovimientosPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('${lista.length}',
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.text, height: 1)),
+                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.text, height: 1)),
                   const SizedBox(width: 6),
-                  const Text('movimientos registrados', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+                  Text('movimientos registrados', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
                 ],
               ),
               const SizedBox(height: 16),
               if (lista.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.all(32),
                   child: Text('Aún no hay movimientos registrados',
                       textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted)),
@@ -131,7 +131,7 @@ class _MovimientoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const muted = TextStyle(fontSize: 12, color: AppColors.textMuted);
+    final muted = TextStyle(fontSize: 12, color: AppColors.textMuted);
     final detalle = [fechaCorta(m.fecha), if (m.origenDestino.isNotEmpty) m.origenDestino].join(' • ');
 
     return Container(
@@ -157,11 +157,11 @@ class _MovimientoCard extends StatelessWidget {
                     Expanded(
                       child: Text('${m.tipo} · ${m.animal.codigo} ${m.animal.nombre}',
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
                     ),
                     if (m.monto != null)
                       Text('\$${m.monto!.toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -172,7 +172,7 @@ class _MovimientoCard extends StatelessWidget {
                 ],
                 const SizedBox(height: 4),
                 Text([m.folio, if (m.guia.isNotEmpty) 'Guía ${m.guia}'].join(' • '),
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
               ],
             ),
           ),

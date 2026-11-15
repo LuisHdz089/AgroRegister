@@ -76,7 +76,7 @@ void verImagen(BuildContext context, String ruta, String titulo) => showDialog(
                 children: [
                   Expanded(
                     child: Text(titulo,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
                   ),
                   IconButton(
                     tooltip: 'Cerrar',
@@ -92,7 +92,7 @@ void verImagen(BuildContext context, String ruta, String titulo) => showDialog(
                 child: Image.file(
                   File(ruta),
                   fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Padding(
+                  errorBuilder: (_, _, _) => Padding(
                     padding: EdgeInsets.all(32),
                     child: Text('No se encontró la imagen. Puede que se haya borrado de la galería.',
                         textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted)),

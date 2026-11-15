@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../datos.dart';
 import '../theme.dart';
+import 'datos_rancho_page.dart';
+import 'legal_page.dart';
 import 'nuevo_movimiento_page.dart';
 
 // Login local. Si aún no hay usuarios, la misma pantalla sirve para crear la primera cuenta;
@@ -18,6 +20,8 @@ class _LoginPageState extends State<LoginPage> {
   final _usuario = TextEditingController();
   final _password = TextEditingController();
   final _confirmar = TextEditingController();
+  final _rancho = CamposRancho.vacios(); // solo en el registro inicial
+  bool _acepta = false; // términos y aviso de privacidad
   bool? _registro; // null mientras se consulta si hay usuarios
   bool _ocultar = true;
   bool _enviando = false;
@@ -36,7 +40,18 @@ class _LoginPageState extends State<LoginPage> {
     for (final c in [_nombre, _usuario, _password, _confirmar]) {
       c.dispose();
     }
+    _rancho.dispose();
     super.dispose();
+  }
+
+  /// Revisa todo el registro antes de guardar nada, para no dejar el rancho a medias.
+  String? get _errorRegistro {
+    if (_nombre.text.trim().isEmpty || _usuario.text.trim().isEmpty) return 'Escribe tu nombre y un usuario';
+    if (_password.text.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+    if (_password.text != _confirmar.text) return 'Las contraseñas no coinciden';
+    if (_rancho.error case final e?) return e;
+    if (!_acepta) return 'Debes aceptar los Términos y condiciones y el Aviso de privacidad';
+    return null;
   }
 
   Future<void> _enviar() async {
@@ -46,9 +61,11 @@ class _LoginPageState extends State<LoginPage> {
     });
     String? error;
     if (_registro!) {
-      error = _password.text != _confirmar.text
-          ? 'Las contraseñas no coinciden'
-          : await registrar(_usuario.text, _nombre.text, _password.text);
+      error = _errorRegistro;
+      if (error == null) {
+        await iniciarRanchoNuevo(_rancho.rancho); // la app arranca con este rancho
+        error = await registrar(_usuario.text, _nombre.text, _password.text);
+      }
     } else if (!await iniciarSesion(_usuario.text, _password.text)) {
       error = 'Usuario o contraseña incorrectos';
     }
@@ -83,15 +100,15 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       registro ? 'Crea tu cuenta' : 'Bienvenido',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.text),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.text),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       registro
-                          ? 'Es la primera vez que se usa la app en este dispositivo'
+                          ? 'Registra tu cuenta y los datos de tu rancho para empezar'
                           : 'Inicia sesión para administrar tu hato',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                      style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                     ),
                     const SizedBox(height: 24),
                     FormTarjeta(
@@ -137,6 +154,40 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+                    if (registro) ...[
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(4, 8, 4, 10),
+                        child: Text('Datos del rancho',
+                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.text)),
+                      ),
+                      ..._rancho.tarjetas(context, setState),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Checkbox(
+                            value: _acepta,
+                            activeColor: AppColors.primary,
+                            semanticLabel: 'Acepto los Términos y condiciones y el Aviso de privacidad',
+                            onChanged: (v) => setState(() => _acepta = v!),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  const Text('He leído y acepto los ', style: TextStyle(fontSize: 13)),
+                                  _enlace('Términos y condiciones', const LegalPage.terminos()),
+                                  const Text(' y el ', style: TextStyle(fontSize: 13)),
+                                  _enlace('Aviso de privacidad', const LegalPage.privacidad()),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     if (_error != null)
                       Container(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -145,11 +196,11 @@ class _LoginPageState extends State<LoginPage> {
                             BoxDecoration(color: AppColors.dangerSoft, borderRadius: BorderRadius.circular(10)),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
+                            Icon(Icons.error_outline, size: 18, color: AppColors.danger),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(_error!,
-                                  style: const TextStyle(fontSize: 13, color: AppColors.danger)),
+                                  style: TextStyle(fontSize: 13, color: AppColors.danger)),
                             ),
                           ],
                         ),
@@ -173,8 +224,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Texto subrayado que abre un documento legal.
+  Widget _enlace(String texto, Widget pagina) => InkWell(
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => pagina)),
+        child: Text(texto,
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+                decoration: TextDecoration.underline)),
+      );
+
   InputDecoration _decoracion(String hint, Widget? sufijo) {
-    const borde = OutlineInputBorder(
+    final borde = OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(10)),
       borderSide: BorderSide(color: AppColors.border),
     );
@@ -182,14 +244,14 @@ class _LoginPageState extends State<LoginPage> {
       filled: true,
       fillColor: AppColors.surface,
       hintText: hint,
-      hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMuted),
-      prefixIcon: const Icon(Icons.lock_outline, size: 18, color: AppColors.textMuted),
+      hintStyle: TextStyle(fontSize: 14, color: AppColors.textMuted),
+      prefixIcon: Icon(Icons.lock_outline, size: 18, color: AppColors.textMuted),
       suffixIcon: sufijo,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       border: borde,
       enabledBorder: borde,
-      focusedBorder: borde.copyWith(borderSide: const BorderSide(color: AppColors.primary)),
+      focusedBorder: borde.copyWith(borderSide: BorderSide(color: AppColors.primary)),
     );
   }
 }

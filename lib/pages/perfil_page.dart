@@ -5,6 +5,7 @@ import '../foto.dart';
 import '../theme.dart';
 import 'ayuda_page.dart';
 import 'datos_rancho_page.dart';
+import 'legal_page.dart';
 import 'notificaciones_page.dart';
 
 // Perfil del rancho: se abre al tocar el avatar del encabezado.
@@ -21,7 +22,7 @@ class PerfilPage extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: const [
+        children: [
           _RanchoCard(),
           SizedBox(height: 24),
           Padding(
@@ -53,6 +54,18 @@ class PerfilPage extends StatelessWidget {
             title: 'Ayuda y preguntas frecuentes',
             subtitle: 'Código GV-### invariable, aretes oficiales',
             destino: AyudaPage.new,
+          ),
+          _Opcion(
+            icon: Icons.gavel_outlined,
+            title: 'Términos y condiciones',
+            subtitle: 'Uso de la aplicación y responsabilidades',
+            destino: LegalPage.terminos,
+          ),
+          _Opcion(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Aviso de privacidad',
+            subtitle: 'Qué datos se guardan y dónde',
+            destino: LegalPage.privacidad,
           ),
           SizedBox(height: 8),
           _CerrarSesion(),
@@ -99,7 +112,7 @@ class _RanchoCard extends StatelessWidget {
                   children: [
                     Text(
                       r.nombre,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text),
                     ),
                     const SizedBox(height: 4),
                     _IconText(Icons.person_outline, r.propietario, 14, AppColors.text),
@@ -114,7 +127,7 @@ class _RanchoCard extends StatelessWidget {
                   color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
+                child: Text(
                   'Activo',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
                 ),
@@ -145,7 +158,7 @@ class _RanchoCard extends StatelessWidget {
                   verComo: 'Fierro del rancho'),
             ),
             const SizedBox(height: 4),
-            const Text('Toca la imagen del fierro para verla en grande',
+            Text('Toca la imagen del fierro para verla en grande',
                 style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
           ],
         ],
@@ -195,7 +208,7 @@ class _Dato extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 11, letterSpacing: 0.5, color: AppColors.textMuted),
+            style: TextStyle(fontSize: 11, letterSpacing: 0.5, color: AppColors.textMuted),
           ),
           const SizedBox(height: 4),
           Row(
@@ -211,7 +224,7 @@ class _Dato extends StatelessWidget {
                 child: Text(
                   value,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
                 ),
               ),
             ],
@@ -269,7 +282,7 @@ class _Opcion extends StatelessWidget {
                             child: Text(
                               title,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.text,
@@ -282,12 +295,12 @@ class _Opcion extends StatelessWidget {
                       Text(
                         subtitle,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                        style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                Icon(Icons.chevron_right, color: AppColors.textMuted),
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'datos.dart';
+import 'notificaciones_sistema.dart';
 import 'pages/animales_page.dart';
 import 'pages/inicio_page.dart';
 import 'pages/login_page.dart';
@@ -16,15 +17,40 @@ Future<void> main() async {
   runApp(const MiGanadoApp());
 }
 
-class MiGanadoApp extends StatelessWidget {
+class MiGanadoApp extends StatefulWidget {
   const MiGanadoApp({super.key});
 
   @override
+  State<MiGanadoApp> createState() => _MiGanadoAppState();
+}
+
+/// Sigue el tema claro/oscuro del dispositivo y redibuja toda la app cuando cambia.
+class _MiGanadoAppState extends State<MiGanadoApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() => setState(() {});
+
+  @override
   Widget build(BuildContext context) {
+    modoOscuro = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
     return MaterialApp(
+      // Los colores de AppColors se leen al construir cada pantalla; con la llave nueva todo se vuelve a
+      // construir con el tema actual. shortcut: al cambiar el tema con la app abierta se vuelve a Inicio.
+      key: ValueKey(modoOscuro),
       title: 'AgroRegister',
       debugShowCheckedModeBanner: false,
-      theme: appTheme,
+      theme: temaApp(),
       home: ValueListenableBuilder(
         valueListenable: usuarioActual,
         builder: (_, usuario, _) => usuario == null ? const LoginPage() : const HomeShell(),
@@ -56,6 +82,7 @@ class _HomeShellState extends State<HomeShell> {
     super.initState();
     pestanaActual.value = 0;
     pestanaActual.addListener(_refrescar);
+    iniciarNotificaciones(); // ya con sesión abierta: avisos de campo en la barra del teléfono
   }
 
   @override
@@ -77,7 +104,7 @@ class _HomeShellState extends State<HomeShell> {
         ),
       ),
       bottomNavigationBar: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
         child: NavigationBar(
@@ -115,7 +142,7 @@ class _Header extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.text),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.text),
             ),
           ),
           // Campana con el número de avisos de campo pendientes.
@@ -131,7 +158,7 @@ class _Header extends StatelessWidget {
                   isLabelVisible: n > 0,
                   label: Text(n > 99 ? '99+' : '$n'),
                   backgroundColor: AppColors.danger,
-                  child: const Icon(Icons.notifications_none, color: AppColors.text, size: 26),
+                  child: Icon(Icons.notifications_none, color: AppColors.text, size: 26),
                 ),
               );
             },
@@ -150,7 +177,7 @@ class _Header extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primarySoft, width: 2),
                 ),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 20,
                   backgroundColor: AppColors.primarySoft,
                   child: Icon(Icons.person, color: AppColors.primary),

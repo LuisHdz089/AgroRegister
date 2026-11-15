@@ -71,7 +71,7 @@ void actualizarAnimal(Animal nuevo) =>
     animales.value = [for (final a in animales.value) a.codigo == nuevo.codigo ? nuevo : a];
 
 // Datos de ejemplo para la primera vez que se abre la app; después se cargan los guardados (datos.dart).
-final animales = ValueNotifier<List<Animal>>(const [
+const animalesEjemplo = [
   Animal('GV-001', 'Luna', 'Hembra', '3 años', 'Holstein', '2584', 'San José',
       color: 'Negro / Blanco', nota: 'Primer parto'),
   Animal('GV-002', 'Rayo', 'Macho', '2 años', 'Pardo Suizo', '2585', 'Potrero 3', color: 'Pardo'),
@@ -79,7 +79,9 @@ final animales = ValueNotifier<List<Animal>>(const [
   Animal('GV-004', 'Torito', 'Macho', '6 meses', 'Mestizo', null, 'Nacimiento', color: 'Café / Blanco'),
   Animal('GV-005', 'Mora', 'Hembra', '4 años', 'Angus Negro', '2572', 'Enfermería',
       color: 'Negro', enTratamiento: true),
-]);
+];
+
+final animales = ValueNotifier<List<Animal>>(animalesEjemplo);
 
 /// Filtro que otra pantalla (las tarjetas de Inicio) pide aplicar en Animales; la pestaña lo aplica y lo limpia.
 final pedidoFiltroAnimales = ValueNotifier<({String? sexo, bool tratamiento})?>(null);
@@ -166,10 +168,10 @@ class _AnimalesPageState extends State<AnimalesPage> {
               children: [
                 Text(
                   '${hato.length}',
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.text, height: 1),
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.text, height: 1),
                 ),
                 const SizedBox(width: 6),
-                const Expanded(
+                Expanded(
                   child: Text('animales en rancho', style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
                 ),
               ],
@@ -184,7 +186,7 @@ class _AnimalesPageState extends State<AnimalesPage> {
               child: TextField(
                 controller: _buscador,
                 onChanged: (v) => setState(() => _busqueda = v),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Buscar por código, nombre o arete...',
                   hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
                   prefixIcon: Icon(Icons.search, color: AppColors.text),
@@ -225,7 +227,7 @@ class _AnimalesPageState extends State<AnimalesPage> {
             ),
             const SizedBox(height: 16),
             if (lista.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(24),
                 child: Text('Sin resultados', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted)),
               ),
@@ -302,8 +304,8 @@ class _AnimalCard extends StatelessWidget {
     final estadoFondo = salida != null
         ? AppColors.border
         : (a.enTratamiento ? AppColors.dangerSoft : AppColors.primarySoft);
-    const muted = TextStyle(fontSize: 12, color: AppColors.textMuted);
-    const fuerte = TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.text);
+    final muted = TextStyle(fontSize: 12, color: AppColors.textMuted);
+    final fuerte = TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.text);
 
     // Tarjeta deshabilitada (atenuada) si el animal ya salió; al tocarla, la ficha explica por qué.
     return Opacity(opacity: salida == null ? 1 : 0.5, child: _tarjeta(context, estadoColor, estadoTexto, estadoFondo, muted, fuerte));
@@ -336,7 +338,7 @@ class _AnimalCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: estadoColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: AppColors.surface, width: 2),
                         ),
                       ),
                     ),
@@ -354,13 +356,13 @@ class _AnimalCard extends StatelessWidget {
                           Flexible(
                             child: Text(a.codigo,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.text)),
+                                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.text)),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(a.nombre,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14, color: AppColors.text)),
+                                style: TextStyle(fontSize: 14, color: AppColors.text)),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -413,7 +415,7 @@ class _AnimalCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right, color: AppColors.text),
+                Icon(Icons.chevron_right, color: AppColors.text),
               ],
             ),
           ),

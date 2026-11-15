@@ -56,7 +56,7 @@ class FichaAnimalPage extends StatelessWidget {
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: const Text('Ficha De Animal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        actions: const [
+        actions: [
           Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
@@ -116,7 +116,7 @@ class FichaAnimalPage extends StatelessWidget {
                   child: _chip(
                     'Fierro verificado',
                     AppColors.text,
-                    Colors.white.withValues(alpha: 0.85),
+                    AppColors.surface.withValues(alpha: 0.85),
                     icon: Icons.verified_outlined,
                   ),
                 ),
@@ -125,7 +125,7 @@ class FichaAnimalPage extends StatelessWidget {
                     right: 10,
                     bottom: 10,
                     child: Material(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       shape: const StadiumBorder(),
                       child: InkWell(
                         customBorder: const StadiumBorder(),
@@ -133,7 +133,7 @@ class FichaAnimalPage extends StatelessWidget {
                           final ruta = await elegirImagen(context);
                           if (ruta != null) actualizarAnimal(a.copyWith(foto: ruta));
                         },
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -160,7 +160,7 @@ class FichaAnimalPage extends StatelessWidget {
                     Expanded(
                       child: Text(
                         a.codigo,
-                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.primary),
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.primary),
                       ),
                     ),
                     salida != null
@@ -174,11 +174,11 @@ class FichaAnimalPage extends StatelessWidget {
                   children: [
                     Text(
                       a.nombre,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
                     ),
                     if (a.nota != null) ...[
                       const SizedBox(width: 6),
-                      Text('(${a.nota})', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                      Text('(${a.nota})', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                     ],
                   ],
                 ),
@@ -211,7 +211,7 @@ class FichaAnimalPage extends StatelessWidget {
                   label: 'Fierro o Marca Registrada',
                   value: rancho.value.nombre,
                   trailing: rancho.value.fierroFoto == null
-                      ? const Icon(Icons.verified_user_outlined, size: 20, color: AppColors.textMuted)
+                      ? Icon(Icons.verified_user_outlined, size: 20, color: AppColors.textMuted)
                       : FotoAnimal(
                           rancho.value.fierroFoto,
                           size: 40,
@@ -265,7 +265,7 @@ class FichaAnimalPage extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Último evento registrado',
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text),
@@ -274,7 +274,7 @@ class FichaAnimalPage extends StatelessWidget {
                     if (ultimo != null)
                       Text(
                         fechaCorta(ultimo.fecha),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.text),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.text),
                       ),
                   ],
                 ),
@@ -284,7 +284,7 @@ class FichaAnimalPage extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
                   child: ultimo == null
-                      ? const Text(
+                      ? Text(
                           'Sin eventos registrados',
                           style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                         )
@@ -299,7 +299,7 @@ class FichaAnimalPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     ultimo.titulo,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.text,
@@ -309,7 +309,7 @@ class FichaAnimalPage extends StatelessWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       ultimo.descripcion,
-                                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                                     ),
                                   ],
                                 ],
@@ -411,7 +411,7 @@ class _BotonBlanco extends StatelessWidget {
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: const BorderSide(color: AppColors.border),
+        side: BorderSide(color: AppColors.border),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
@@ -450,12 +450,12 @@ class _Titulo extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
           ),
         ),
         Text(
           accion,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
         ),
       ],
     ),
@@ -468,7 +468,7 @@ Widget _circulo(Widget icono) => Container(
   width: 36,
   height: 36,
   alignment: Alignment.center,
-  decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+  decoration: BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
   child: icono,
 );
 
@@ -491,12 +491,12 @@ class _Dato extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              Text(label, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
               Text(
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
               ),
             ],
           ),
@@ -548,12 +548,12 @@ class _Fila extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              Text(label, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
               Text(
                 value,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.text),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.text),
               ),
             ],
           ),
@@ -618,7 +618,7 @@ class _Historial extends StatelessWidget {
                             child: Text(
                               title,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -630,12 +630,12 @@ class _Historial extends StatelessWidget {
                         subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.text),
+                Icon(Icons.chevron_right, color: AppColors.text),
               ],
             ),
           ),
@@ -681,20 +681,20 @@ class _AvisoSalida extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.block, color: AppColors.danger),
+          Icon(Icons.block, color: AppColors.danger),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Ya no forma parte del ganado',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.danger),
                 ),
                 const SizedBox(height: 2),
-                Text(detalle, style: const TextStyle(fontSize: 12, color: AppColors.text)),
+                Text(detalle, style: TextStyle(fontSize: 12, color: AppColors.text)),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Su ficha e historial se conservan, pero no se cuenta en el hato ni admite nuevos registros.',
                   style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),

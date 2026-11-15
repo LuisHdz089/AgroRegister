@@ -212,7 +212,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
           isDense: true,
           hint: hint,
           icon: Icon(flecha, color: AppColors.text),
-          style: const TextStyle(fontSize: 14, color: AppColors.text),
+          style: TextStyle(fontSize: 14, color: AppColors.text),
           items: [
             for (final x in items)
               DropdownMenuItem(
@@ -235,7 +235,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: const Text('Nueva incidencia', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        actions: const [
+        actions: [
           Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
@@ -262,7 +262,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
                         Row(
                           children: [
                             Text(a.codigo,
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.text)),
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.text)),
                             const SizedBox(width: 6),
                             if (a.nombre.isNotEmpty)
                               Flexible(child: formChip(a.nombre, AppColors.primary, AppColors.primarySoft)),
@@ -272,7 +272,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
                           a.especie,
                           Text('${a.sexo} • ${a.edad} • Arete actual: ${a.arete ?? 'en trámite'}',
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                              style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                           size: 14,
                         ),
                       ],
@@ -305,7 +305,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
                   child: Row(
                     children: [
                       Expanded(child: Text(fechaCorta(_fecha), style: const TextStyle(fontSize: 14))),
-                      const Icon(Icons.event, size: 18, color: AppColors.text),
+                      Icon(Icons.event, size: 18, color: AppColors.text),
                     ],
                   ),
                 ),
@@ -345,7 +345,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.sell_outlined, size: 16, color: AppColors.text),
                       SizedBox(width: 6),
@@ -383,7 +383,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Asigna el número oficial plastificado o metálico. No afecta el identificador primario del animal.',
                     style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                   ),
@@ -394,7 +394,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const FormEtiqueta('Descripción detallada', extra: 'Notas de campo', extraColor: AppColors.textMuted),
+                FormEtiqueta('Descripción detallada', extra: 'Notas de campo', extraColor: AppColors.textMuted),
                 FormCampo(controller: _notas, hint: r.notas, lineas: 4),
               ],
             ),
@@ -416,7 +416,7 @@ class _NuevaIncidenciaPageState extends State<NuevaIncidenciaPage> {
           const SizedBox(height: 6),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar y volver al expediente',
+            child: Text('Cancelar y volver al expediente',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
           ),
         ],
@@ -458,7 +458,7 @@ class _Efecto extends StatelessWidget {
         children: [
           Icon(baja ? Icons.logout : Icons.info_outline, size: 18, color: baja ? AppColors.danger : AppColors.primary),
           const SizedBox(width: 8),
-          Expanded(child: Text('Al guardar, $texto', style: const TextStyle(fontSize: 12, color: AppColors.text))),
+          Expanded(child: Text('Al guardar, $texto', style: TextStyle(fontSize: 12, color: AppColors.text))),
         ],
       ),
     );

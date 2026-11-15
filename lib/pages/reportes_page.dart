@@ -12,13 +12,24 @@ import 'movimientos_page.dart';
 import 'nueva_incidencia_page.dart';
 import 'resumen_mensual_page.dart';
 
-// shortcut: categoría deducida de sexo y edad (no hay campo propio), agregar "propósito" al Animal cuando se necesite.
-// Ordeño/Engorda solo aplica a bovinos; caballos, borregos y cerdos adultos van como "Adulto".
-String categoria(Animal a) => !a.edad.contains('año')
-    ? 'Cría'
-    : a.especie != 'Bovino'
-        ? 'Adulto'
-        : (a.sexo == 'Hembra' ? 'Ordeño' : 'Engorda');
+/// Categorías de cada especie: (hembra adulta, macho adulto, cría), cada una en (singular, plural para el censo).
+const categoriasEspecie = {
+  'Bovino': (('Ordeño', 'En Ordeño'), ('Engorda', 'Engorda'), ('Cría', 'Crías')),
+  'Equino': (('Yegua', 'Yeguas'), ('Caballo', 'Caballos'), ('Potro', 'Potros')),
+  'Ovino': (('Borrega', 'Borregas'), ('Semental', 'Sementales'), ('Cordero', 'Corderos')),
+  'Porcino': (('Vientre', 'Vientres'), ('Engorda', 'Engorda'), ('Lechón', 'Lechones')),
+};
+
+/// Para el censo de varias especies juntas.
+const categoriasGenerales = (('Hembra adulta', 'Hembras adultas'), ('Macho adulto', 'Machos adultos'), ('Cría', 'Crías'));
+
+bool esCria(Animal a) => !a.edad.contains('año'); // menor de un año
+
+// shortcut: categoría deducida de especie, sexo y edad (no hay campo propio), agregar "propósito" al Animal si se necesita.
+String categoria(Animal a) {
+  final (hembra, macho, cria) = categoriasEspecie[a.especie] ?? categoriasGenerales;
+  return esCria(a) ? cria.$1 : (a.sexo == 'Hembra' ? hembra.$1 : macho.$1);
+}
 
 /// Archivo .xlsx con el padrón del hato: una hoja "Padrón" con encabezado y una fila por animal.
 List<int> padronExcel(List<Animal> lista) {
@@ -51,7 +62,7 @@ List<int> padronExcel(List<Animal> lista) {
 Future<void> descargarPadron(BuildContext context) async {
   final hoy = DateTime.now();
   final nombre =
-      'padron_vacatec_${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}.xlsx';
+      'agroregister_padron_${hoy.year}-${hoy.month.toString().padLeft(2, '0')}-${hoy.day.toString().padLeft(2, '0')}.xlsx';
   String mensaje;
   try {
     final destino = await FilePicker.saveFile(
@@ -89,15 +100,15 @@ class ResumenHato {
 
   ResumenHato._(List<Animal> hato, this.registrados, List<Movimiento> movs, DateTimeRange periodo)
       : total = hato.length,
-        ordeno = hato.where((a) => categoria(a) == 'Ordeño').length,
-        engorda = hato.where((a) => categoria(a) == 'Engorda').length,
-        crias = hato.where((a) => categoria(a) == 'Cría').length,
+        hembrasAdultas = hato.where((a) => !esCria(a) && a.sexo == 'Hembra').length,
+        machosAdultos = hato.where((a) => !esCria(a) && a.sexo != 'Hembra').length,
+        crias = hato.where(esCria).length,
         hembras = hato.where((a) => a.sexo == 'Hembra').length,
         sinArete = hato.where((a) => a.arete == null).length,
         enTratamiento = hato.where((a) => a.enTratamiento).length,
         delPeriodo = movs.where((m) => enPeriodo(m.fecha, periodo)).toList();
 
-  final int total, registrados, ordeno, engorda, crias, hembras, sinArete, enTratamiento;
+  final int total, registrados, hembrasAdultas, machosAdultos, crias, hembras, sinArete, enTratamiento;
   final List<Movimiento> delPeriodo;
 
   int get machos => total - hembras;
@@ -130,6 +141,11 @@ class ReportesPage extends StatelessWidget {
       listenable: Listenable.merge([animales, movimientos, incidencias]),
       builder: (context, _) {
         final r = ResumenHato(animales.value, movimientos.value, periodoDelMes(DateTime.now()));
+        // Especies con al menos un animal registrado (aunque ya haya salido del ganado), en el orden de [especies].
+        final especiesRegistradas = [
+          for (final e in especies.keys)
+            if (animales.value.any((a) => a.especie == e)) e,
+        ];
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
@@ -142,10 +158,10 @@ class ReportesPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Corte de Hato Activo',
+                        Text('Corte de Hato Activo',
                             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.primary)),
                         Text('Actualizado hoy, ${TimeOfDay.now().format(context)}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                            style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                       ],
                     ),
                   ),
@@ -153,80 +169,35 @@ class ReportesPage extends StatelessWidget {
                 ],
               ),
             ),
-            _Tarjeta(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('CENSO TOTAL',
-                                style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: AppColors.textMuted)),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Text('${r.total}',
-                                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.text)),
-                                const SizedBox(width: 6),
-                                const Flexible(
-                                  child: Text('cabezas registradas',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 14, color: AppColors.textMuted)),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      _iconoCuadro(Icons.fingerprint, AppColors.primary, AppColors.primarySoft),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        children: [
-                          _Cifra('En Ordeño', r.ordeno),
-                          const VerticalDivider(color: AppColors.border, width: 1),
-                          _Cifra('Engorda', r.engorda),
-                          const VerticalDivider(color: AppColors.border, width: 1),
-                          _Cifra('Crías', r.crias),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  const Text('POR ESPECIE',
-                      style: TextStyle(
-                          fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.textMuted)),
-                  const SizedBox(height: 8),
-                  for (final MapEntry(key: clave, value: (_, plural, _)) in especies.entries)
-                    _CensoEspecie(
-                      clave,
-                      plural,
-                      // Las mismas cifras del reporte, solo con los animales (y ventas) de esa especie.
-                      ResumenHato(
-                        animales.value.where((a) => a.especie == clave).toList(),
-                        movimientos.value.where((m) => m.animal.especie == clave).toList(),
-                        periodoDelMes(DateTime.now()),
-                      ),
-                    ),
-                ],
-              ),
+            // Censo general; si todo el ganado es de una sola especie, usa sus categorías (p. ej. "En Ordeño").
+            _Censo(
+              'CENSO TOTAL',
+              r,
+              icono: Icon(Icons.fingerprint, color: AppColors.primary),
+              categorias: especiesRegistradas.length == 1
+                  ? categoriasEspecie[especiesRegistradas.single]!
+                  : categoriasGenerales,
             ),
+            // Un censo por cada especie con animales registrados, con sus propias categorías.
+            for (final clave in especiesRegistradas)
+              _Censo(
+                'CENSO ${especies[clave]!.$2.toUpperCase()}',
+                // Las mismas cifras del reporte, solo con los animales (y ventas) de esa especie.
+                ResumenHato(
+                  animales.value.where((a) => a.especie == clave).toList(),
+                  movimientos.value.where((m) => m.animal.especie == clave).toList(),
+                  periodoDelMes(DateTime.now()),
+                ),
+                icono: IconoEspecie(clave, size: 30),
+                categorias: categoriasEspecie[clave]!,
+                detalle: true,
+              ),
             _Tarjeta(
               child: Column(
                 children: [
                   _Titulo(Icons.groups_outlined, 'Distribución por Sexo',
                       extra: Text('${r.pct(r.hembras)}% Hembras',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text))),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text))),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
@@ -276,7 +247,7 @@ class ReportesPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                         onTap: () =>
                             Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ResumenMensualPage())),
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.all(4),
                           child: Row(
                             children: [
@@ -293,15 +264,15 @@ class ReportesPage extends StatelessWidget {
                     child: Row(
                       children: [
                         Text('${r.delPeriodo.length}',
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.primary)),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Registrados este ciclo',
+                              Text('Registrados este ciclo',
                                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                              Text(r.desglose, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                              Text(r.desglose, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                             ],
                           ),
                         ),
@@ -320,20 +291,20 @@ class ReportesPage extends StatelessWidget {
                       extra: r.pendientes == 0
                           ? null
                           : Text('${r.pendientes} Requieren atención',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.danger))),
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.danger))),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: _Incidencia('Pendientes', r.pendientes, AppColors.danger,
                             r.pendientes == 0 ? 'Sin pendientes' : r.desglosePendientes,
-                            const Icon(Icons.circle, size: 8, color: AppColors.danger)),
+                            Icon(Icons.circle, size: 8, color: AppColors.danger)),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: _Incidencia('Atendidas', incidencias.value.where((i) => i.atendida).length,
                             AppColors.text, 'Resueltas en fecha',
-                            const Icon(Icons.check_circle_outline, size: 16, color: AppColors.textMuted)),
+                            Icon(Icons.check_circle_outline, size: 16, color: AppColors.textMuted)),
                       ),
                     ],
                   ),
@@ -344,9 +315,9 @@ class ReportesPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Hato en Seguimiento Fotográfico',
+                  Text('Hato en Seguimiento Fotográfico',
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text)),
-                  const Text('Últimos ejemplares con fichas de campo inspeccionadas',
+                  Text('Últimos ejemplares con fichas de campo inspeccionadas',
                       style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   const SizedBox(height: 10),
                   SingleChildScrollView(
@@ -456,7 +427,7 @@ class _Titulo extends StatelessWidget {
               : Icon(icon, size: 20, color: fg),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+            child: Text(text, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
           ),
           ?extra,
         ],
@@ -475,8 +446,8 @@ class _Cifra extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
         child: Column(
           children: [
-            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-            Text('$n', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.text)),
+            Text(label, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+            Text('$n', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.text)),
           ],
         ),
       );
@@ -498,7 +469,7 @@ class _Caja extends StatelessWidget {
             Container(
               width: 30,
               height: 30,
-              decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
               child: Icon(icon, size: 16, color: AppColors.primary),
             ),
             const SizedBox(width: 8),
@@ -506,10 +477,10 @@ class _Caja extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  Text(label, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   Text(value,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.text)),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.text)),
                 ],
               ),
             ),
@@ -536,7 +507,7 @@ class _Estado extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  Text(label, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   Text('$n', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
                 ],
               ),
@@ -572,7 +543,7 @@ class _Incidencia extends StatelessWidget {
               ],
             ),
             Text('$n', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
-            Text(detalle, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+            Text(detalle, style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
           ],
         ),
       );
@@ -599,9 +570,9 @@ class _Mini extends StatelessWidget {
                 children: [
                   Text('${a.codigo} (${a.nombre})',
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.text)),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.text)),
                   Text('${a.edad} · ${categoria(a)}',
-                      overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                      overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
                 ],
               ),
             ),
@@ -610,58 +581,84 @@ class _Mini extends StatelessWidget {
       );
 }
 
-/// Bloque del censo para una especie: total y todos sus datos (sexo, edad, salud, arete y bajas).
-class _CensoEspecie extends StatelessWidget {
-  const _CensoEspecie(this.especie, this.plural, this.r);
+/// Tarjeta de censo: total de cabezas y sus tres categorías (hembras adultas, machos adultos y crías,
+/// con los nombres de cada especie). Con [detalle], agrega sexo, salud, arete y bajas.
+class _Censo extends StatelessWidget {
+  const _Censo(this.titulo, this.r, {required this.icono, required this.categorias, this.detalle = false});
 
-  final String especie;
-  final String plural;
+  final String titulo;
   final ResumenHato r;
+  final Widget icono;
+  final ((String, String), (String, String), (String, String)) categorias;
+  final bool detalle;
 
   @override
   Widget build(BuildContext context) {
-    final vacio = r.total == 0;
+    final (hembra, macho, cria) = categorias;
     final datos = <(String, int, Color?)>[
       ('Hembras', r.hembras, null),
       ('Machos', r.machos, null),
-      ('Crías', r.crias, null),
-      if (especie == 'Bovino') ...[('Ordeño', r.ordeno, null), ('Engorda', r.engorda, null)]
-      else ('Adultos', r.total - r.crias, null),
       ('En tratamiento', r.enTratamiento, r.enTratamiento > 0 ? AppColors.danger : null),
       ('Sin arete', r.sinArete, r.sinArete > 0 ? AppColors.warning : null),
-      ('Bajas (venta, traslado, muerte o robo)', r.bajas, r.bajas > 0 ? AppColors.danger : null),
+      ('Bajas', r.bajas, r.bajas > 0 ? AppColors.danger : null),
     ];
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(12)),
+    return _Tarjeta(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(color: AppColors.primarySoft, shape: BoxShape.circle),
-                child: IconoEspecie(especie, size: 26, color: vacio ? AppColors.textMuted : AppColors.primary),
-              ),
-              const SizedBox(width: 10),
               Expanded(
-                child: Text(plural,
-                    style: TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w700, color: vacio ? AppColors.textMuted : AppColors.text)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(titulo,
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5, color: AppColors.textMuted)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text('${r.total}',
+                            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.text)),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text('cabezas registradas',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              Text('${r.total}',
-                  style: TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.w800, color: vacio ? AppColors.textMuted : AppColors.text)),
-              const SizedBox(width: 4),
-              Text(r.total == 1 ? 'cabeza' : 'cabezas', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(10)),
+                child: icono,
+              ),
             ],
           ),
-          if (!vacio) ...[
-            const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  _Cifra(hembra.$2, r.hembrasAdultas),
+                  VerticalDivider(color: AppColors.border, width: 1),
+                  _Cifra(macho.$2, r.machosAdultos),
+                  VerticalDivider(color: AppColors.border, width: 1),
+                  _Cifra(cria.$2, r.crias),
+                ],
+              ),
+            ),
+          ),
+          if (detalle) ...[
+            const SizedBox(height: 10),
             Wrap(
               spacing: 6,
               runSpacing: 6,
@@ -678,9 +675,7 @@ class _CensoEspecie extends StatelessWidget {
                       text: '$etiqueta ',
                       style: TextStyle(fontSize: 11, color: alerta ?? AppColors.textMuted),
                       children: [
-                        TextSpan(
-                            text: '$n',
-                            style: TextStyle(fontWeight: FontWeight.w800, color: alerta ?? AppColors.text)),
+                        TextSpan(text: '$n', style: TextStyle(fontWeight: FontWeight.w800, color: alerta ?? AppColors.text)),
                       ],
                     )),
                   ),

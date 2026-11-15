@@ -28,7 +28,8 @@ class Evento {
   final IconData icono;
 }
 
-const _vistaMovimiento = {
+// Getter (no constante): los colores cambian con el tema claro/oscuro.
+Map<String, (String, String, Color, Color)> get _vistaMovimiento => {
   'Venta': ('Venta definitiva', 'Egreso', AppColors.danger, AppColors.dangerSoft),
   'Compra': ('Ingreso de Compra', 'Ingreso', AppColors.textMuted, AppColors.border),
   'Traslado': ('Traslado interno', 'Manejo', AppColors.primary, AppColors.primarySoft),
@@ -120,7 +121,7 @@ class _HistorialPageState extends State<HistorialPage> {
             backgroundColor: AppColors.background,
             surfaceTintColor: Colors.transparent,
             title: const Text('Ficha De Animal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-            actions: const [
+            actions: [
               Padding(
                 padding: EdgeInsets.only(right: 16),
                 child: CircleAvatar(
@@ -151,7 +152,7 @@ class _HistorialPageState extends State<HistorialPage> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text('LÍNEA DE TIEMPO REGISTRADA',
                         style: TextStyle(
                             fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.textMuted)),
@@ -164,7 +165,7 @@ class _HistorialPageState extends State<HistorialPage> {
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(_verIncidencias ? 'Sin incidencias registradas' : 'Sin movimientos registrados',
-                      textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textMuted)),
+                      textAlign: TextAlign.center, style: TextStyle(color: AppColors.textMuted)),
                 ),
               for (final (i, e) in lista.indexed) _Punto(e, ultimo: i == lista.length - 1),
               const SizedBox(height: 8),
@@ -234,7 +235,7 @@ class _Encabezado extends StatelessWidget {
                     Flexible(
                       child: Text(a.nombre.isEmpty ? a.codigo : a.nombre,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.text)),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.text)),
                     ),
                     const SizedBox(width: 6),
                     _chip(a.codigo, AppColors.textMuted, AppColors.border),
@@ -243,7 +244,7 @@ class _Encabezado extends StatelessWidget {
                 conIconoEspecie(
                   a.especie,
                   Text('${a.raza} • ${a.sexo} • Arete ${a.arete ?? 'en trámite'}',
-                      overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                      overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   size: 14,
                 ),
               ],
@@ -256,7 +257,7 @@ class _Encabezado extends StatelessWidget {
                   ? _chip('En tratamiento', AppColors.danger, AppColors.dangerSoft)
                   : _chip('Activo', AppColors.primary, AppColors.primarySoft),
               const SizedBox(height: 4),
-              Text(a.edad, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              Text(a.edad, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
             ],
           ),
         ],
@@ -340,18 +341,18 @@ class _Punto extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(e.titulo,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
                       ),
                       const SizedBox(width: 6),
                       _chip(e.etiqueta, e.fg, e.bg),
                       const Spacer(),
                       Text(fechaCorta(e.fecha),
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text)),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text)),
                     ],
                   ),
                   if (e.descripcion.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text(e.descripcion, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                    Text(e.descripcion, style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
                   ],
                   if (e.detalles.isNotEmpty || e.folio != null) ...[
                     const SizedBox(height: 8),
@@ -373,7 +374,7 @@ class _Punto extends StatelessWidget {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(texto,
-                                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                                            style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                                       ),
                                     ],
                                   ),
@@ -382,7 +383,7 @@ class _Punto extends StatelessWidget {
                           ),
                           if (e.folio != null)
                             Text('Folio #${e.folio}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.text)),
                         ],
                       ),

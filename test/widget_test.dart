@@ -14,6 +14,9 @@ import 'package:vaca_tec/pages/animales_page.dart';
 import 'package:vaca_tec/pages/certificado_page.dart';
 import 'package:vaca_tec/pages/ficha_animal_page.dart';
 import 'package:vaca_tec/pages/inicio_page.dart';
+import 'package:vaca_tec/pages/legal_page.dart';
+import 'package:vaca_tec/notificaciones_sistema.dart';
+import 'package:vaca_tec/theme.dart';
 import 'package:vaca_tec/pages/movimientos_page.dart';
 import 'package:vaca_tec/pages/notificaciones_page.dart';
 import 'package:vaca_tec/pages/nueva_incidencia_page.dart';
@@ -75,6 +78,8 @@ void main() {
   });
 
   testWidgets('tocar el avatar abre el perfil', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 2000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(const MiGanadoApp());
     await tester.tap(find.bySemanticsLabel('Perfil'));
     await tester.pumpAndSettle();
@@ -82,6 +87,10 @@ void main() {
     expect(find.text('Usuarios y personal'), findsNothing);
     expect(find.textContaining('Sincronización'), findsNothing);
     expect(find.text('Notificaciones de campo'), findsOneWidget);
+    await tester.ensureVisible(find.text('Aviso de privacidad'));
+    await tester.tap(find.text('Aviso de privacidad'));
+    await tester.pumpAndSettle();
+    expect(find.text('Derechos ARCO'), findsOneWidget);
   });
 
   test('avisos de campo: solo del ganado actual y según las preferencias', () {
@@ -214,11 +223,55 @@ void main() {
     await tester.tap(find.widgetWithText(NavigationDestination, 'Reportes'));
     await tester.pumpAndSettle();
     expect(find.text('CENSO TOTAL'), findsOneWidget);
-    expect(find.text('POR ESPECIE'), findsOneWidget);
-    for (final e in ['Bovinos', 'Caballos', 'Borregos', 'Cerdos']) {
-      expect(find.text(e), findsOneWidget); // las cuatro especies, aunque no haya animales
-    }
-    expect(find.textContaining('Hembras '), findsWidgets); // datos por especie
+    // Aquí solo hay bovinos: un censo por especie registrada, con sus categorías.
+    expect(find.text('CENSO BOVINOS'), findsOneWidget);
+    expect(find.text('CENSO CABALLOS'), findsNothing);
+    expect(find.text('En Ordeño'), findsNWidgets(2)); // el general (una sola especie) y el de bovinos
+    expect(find.textContaining('En tratamiento '), findsOneWidget); // datos del censo por especie
+  });
+
+  test('categorías propias de cada especie', () {
+    Animal a(String especie, String sexo, String edad) =>
+        Animal('GV-1', '', sexo, edad, '', '1', '', color: '', especie: especie);
+    expect([
+      categoria(a('Bovino', 'Hembra', '3 años')),
+      categoria(a('Bovino', 'Macho', '2 años')),
+      categoria(a('Bovino', 'Hembra', '6 meses')),
+      categoria(a('Equino', 'Hembra', '5 años')),
+      categoria(a('Equino', 'Macho', '1 año')),
+      categoria(a('Equino', 'Macho', '3 meses')),
+      categoria(a('Ovino', 'Macho', '2 años')),
+      categoria(a('Ovino', 'Hembra', '2 meses')),
+      categoria(a('Porcino', 'Hembra', '1 año')),
+      categoria(a('Porcino', 'Macho', '1 mes')),
+    ], ['Ordeño', 'Engorda', 'Cría', 'Yegua', 'Caballo', 'Potro', 'Semental', 'Cordero', 'Vientre', 'Lechón']);
+  });
+
+  test('resumen de avisos para la notificación', () {
+    const x = Animal('GV-1', '', 'Hembra', '1 año', '', null, '', color: '');
+    Aviso av(String tipo) => (tipo: tipo, animal: x, titulo: '', detalle: '');
+    expect(resumenAvisos([av('Vacunas'), av('Vacunas'), av('Aretado'), av('Pendientes')]),
+        '1 incidencia pendiente • 1 sin arete • 2 vacunas pendientes');
+    expect(resumenAvisos([]), '');
+  });
+
+  testWidgets('tema oscuro cuando el dispositivo está en modo oscuro', (tester) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(() {
+      tester.platformDispatcher.clearPlatformBrightnessTestValue();
+      modoOscuro = false;
+    });
+    await tester.pumpWidget(const MiGanadoApp());
+    expect(modoOscuro, isTrue);
+    final fondo = tester.widget<Scaffold>(find.byType(Scaffold).first).backgroundColor ??
+        Theme.of(tester.element(find.byType(Scaffold).first)).scaffoldBackgroundColor;
+    expect(fondo, const Color(0xFF121614));
+
+    // Si el usuario cambia el tema del teléfono con la app abierta, la app lo sigue.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    await tester.pumpAndSettle();
+    expect(modoOscuro, isFalse);
+    expect(Theme.of(tester.element(find.byType(Scaffold).first)).scaffoldBackgroundColor, const Color(0xFFF4F6F5));
   });
 
   test('venta y traslado sacan al animal del ganado; compra y nacimiento no', () {
@@ -457,7 +510,7 @@ void main() {
     ], periodoDelMes(hoy));
 
     // El toro (vendido) y el novillo (trasladado) ya no cuentan en el ganado.
-    expect([r.registrados, r.total, r.ordeno, r.engorda, r.crias], [4, 2, 1, 0, 1]);
+    expect([r.registrados, r.total, r.hembrasAdultas, r.machosAdultos, r.crias], [4, 2, 1, 0, 1]);
     expect([r.hembras, r.machos, r.pct(r.hembras)], [2, 0, 100]);
     expect([r.bajas, r.activos, r.pctActivos], [2, 2, '50.0%']);
     expect(r.delPeriodo.length, 3);
@@ -606,7 +659,7 @@ void main() {
     await tester.pumpAndSettle();
     final caballo = animales.value.last;
     expect([caballo.nombre, caballo.especie, caballo.raza], ['Relámpago', 'Equino', 'Cuarto de Milla']);
-    expect(categoria(caballo), 'Cría');
+    expect(categoria(caballo), 'Potro'); // cría de caballo
 
     await tester.ensureVisible(find.text('Caballos (1)')); // la fila de especies se desplaza de lado
     await tester.tap(find.text('Caballos (1)'));
@@ -700,7 +753,7 @@ void main() {
     expect(filas, hasLength(3));
     expect(filas[0].first, 'Código');
     expect(filas[1], ['GV-9', 'Luna', 'Bovino', 'Macho', '2 años', 'Angus', 'Negro', 'En trámite', 'X', 'Engorda', 'Activo']);
-    expect([filas[2][0], filas[2][2], filas[2][7], filas[2][9], filas[2][10]], ['GV-10', 'Cerdo', '77', 'Cría', 'En tratamiento']);
+    expect([filas[2][0], filas[2][2], filas[2][7], filas[2][9], filas[2][10]], ['GV-10', 'Cerdo', '77', 'Lechón', 'En tratamiento']);
   });
 
   // ---- Base de datos y login. Van al final y en este orden: enlazan los datos globales con una base real. ----
@@ -839,5 +892,50 @@ void main() {
     expect((await db.query('rancho')).single['fierro_foto'], 'C:/fierro.png');
     await db.close();
     rancho.value = const Rancho();
+  });
+
+  testWidgets('registro inicial: pide los datos del rancho y los términos, y arranca sin datos de ejemplo', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 3200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // Base nueva, sin usuarios, con los animales de ejemplo de la primera instalación.
+    animales.value = animalesEjemplo;
+    movimientos.value = [];
+    incidencias.value = [];
+    await tester.runAsync(() => iniciarDatos(ruta: '${Directory.systemTemp.createTempSync('vacatec_reg').path}/r.db'));
+    usuarioActual.value = null;
+    expect(soloDatosDeEjemplo, isTrue);
+
+    Future<void> esperar() async {
+      await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 300)));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.pumpWidget(const MiGanadoApp());
+    await esperar();
+    expect(find.text('Crea tu cuenta'), findsOneWidget);
+    expect(find.text('Datos del rancho'), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextField, 'Ej. Juan Pérez'), 'Luis Eduardo');
+    await tester.enterText(find.widgetWithText(TextField, 'Ej. juan'), 'luis');
+    await tester.enterText(find.widgetWithText(TextField, 'Mínimo 6 caracteres'), 'secreta1');
+    await tester.enterText(find.widgetWithText(TextField, 'Repite la contraseña'), 'secreta1');
+    await tester.enterText(find.widgetWithText(TextField, 'Ej. Rancho San José'), 'Los Cocos');
+    await tester.enterText(find.widgetWithText(TextField, 'Ej. Don Juan Pérez'), 'Luis Eduardo Hernández');
+
+    // Sin aceptar los términos no se crea la cuenta.
+    await tester.tap(find.text('Crear cuenta'));
+    await esperar();
+    expect(find.textContaining('Debes aceptar'), findsOneWidget);
+    expect(await tester.runAsync(hayUsuarios), isFalse);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.tap(find.text('Crear cuenta'));
+    await esperar();
+    await esperar();
+    expect(find.text('LOS COCOS'), findsOneWidget); // ya en Inicio, con el rancho registrado
+    expect(find.textContaining('Buen día, Luis Eduardo'), findsOneWidget);
+    expect(animales.value, isEmpty); // sin los animales de ejemplo
+    expect(rancho.value.propietario, 'Luis Eduardo Hernández');
+    expect(await tester.runAsync(terminosAceptados), contains(versionLegal));
   });
 }

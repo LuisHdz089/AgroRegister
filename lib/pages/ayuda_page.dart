@@ -58,12 +58,12 @@ class AyudaPage extends StatelessWidget {
                 data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                 child: ExpansionTile(
                   shape: const RoundedRectangleBorder(),
-                  leading: const Icon(Icons.help_outline, color: AppColors.primary),
+                  leading: Icon(Icons.help_outline, color: AppColors.primary),
                   title: Text(pregunta,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
                   childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                   children: [
-                    Text(respuesta, style: const TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4)),
+                    Text(respuesta, style: TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4)),
                   ],
                 ),
               ),

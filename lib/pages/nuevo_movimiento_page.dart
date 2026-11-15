@@ -188,7 +188,7 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
         title: const Text('Nuevo Registro', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        actions: const [
+        actions: [
           Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
@@ -209,18 +209,18 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.swap_horiz, color: AppColors.primary),
+                  child: Icon(Icons.swap_horiz, color: AppColors.primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Movimiento de Hato',
+                      Text('Movimiento de Hato',
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
                       Text('${rancho.value.nombre} • Registro #$_folio',
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                          style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
                     ],
                   ),
                 ),
@@ -240,8 +240,8 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
                       value: _tipo,
                       isExpanded: true,
                       isDense: true,
-                      icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.text),
-                      style: const TextStyle(fontSize: 14, color: AppColors.text),
+                      icon: Icon(Icons.keyboard_arrow_down, color: AppColors.text),
+                      style: TextStyle(fontSize: 14, color: AppColors.text),
                       items: [for (final t in reglasMovimiento.keys) DropdownMenuItem(value: t, child: Text(t))],
                       onChanged: (t) => setState(() => _tipo = t!),
                     ),
@@ -269,7 +269,7 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
                   child: Row(
                     children: [
                       Expanded(child: Text(fechaCorta(_fecha), style: const TextStyle(fontSize: 14))),
-                      const Icon(Icons.event, size: 18, color: AppColors.text),
+                      Icon(Icons.event, size: 18, color: AppColors.text),
                     ],
                   ),
                 ),
@@ -303,8 +303,8 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
                         isExpanded: true,
                         isDense: true,
                         hint: const Text('Selecciona un animal del ganado', style: TextStyle(fontSize: 14)),
-                        icon: const Icon(Icons.unfold_more, color: AppColors.text),
-                        style: const TextStyle(fontSize: 14, color: AppColors.text),
+                        icon: Icon(Icons.unfold_more, color: AppColors.text),
+                        style: TextStyle(fontSize: 14, color: AppColors.text),
                         items: [
                           for (final x in _activos)
                             DropdownMenuItem(
@@ -336,8 +336,8 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
                         isExpanded: true,
                         isDense: true,
                         hint: const Text('Sin especificar', style: TextStyle(fontSize: 14)),
-                        icon: const Icon(Icons.unfold_more, color: AppColors.text),
-                        style: const TextStyle(fontSize: 14, color: AppColors.text),
+                        icon: Icon(Icons.unfold_more, color: AppColors.text),
+                        style: TextStyle(fontSize: 14, color: AppColors.text),
                         items: [
                           const DropdownMenuItem<Animal?>(value: null, child: Text('Sin especificar')),
                           for (final x in _activos.where((x) => x.sexo == 'Hembra'))
@@ -364,7 +364,7 @@ class _NuevoMovimientoPageState extends State<NuevoMovimientoPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.tune, size: 20, color: AppColors.text),
                       SizedBox(width: 8),
@@ -482,13 +482,13 @@ class _VistaAnimal extends StatelessWidget {
                   children: [
                     TextSpan(
                         text: ' • ${a.nombre}',
-                        style: const TextStyle(fontWeight: FontWeight.w400, color: AppColors.textMuted)),
+                        style: TextStyle(fontWeight: FontWeight.w400, color: AppColors.textMuted)),
                   ],
                 )),
                 conIconoEspecie(
                   a.especie,
                   Text('${a.raza} • ${a.sexo} ${a.edad} • Arete ${a.arete ?? 'en trámite'}',
-                      overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                      overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   size: 14,
                 ),
               ],
@@ -524,7 +524,7 @@ class _FotoGuia extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(8)),
-                  child: const Icon(Icons.photo_camera_outlined, size: 20, color: AppColors.text),
+                  child: Icon(Icons.photo_camera_outlined, size: 20, color: AppColors.text),
                 )
               : FotoAnimal(ruta, size: 36, radius: 8, iconSize: 18),
           const SizedBox(width: 10),
@@ -532,10 +532,10 @@ class _FotoGuia extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Foto de documento o guía',
+                Text('Foto de documento o guía',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text)),
                 Text(ruta == null ? 'Opcional para respaldo sanitario' : 'Documento adjunto',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
               ],
             ),
           ),
@@ -591,7 +591,7 @@ class _Aviso extends StatelessWidget {
           Expanded(
             child: Text.rich(
               TextSpan(
-                style: const TextStyle(fontSize: 12, color: AppColors.text),
+                style: TextStyle(fontSize: 12, color: AppColors.text),
                 children: [
                   TextSpan(text: inicio),
                   TextSpan(text: quien, style: const TextStyle(fontWeight: FontWeight.w700)),
@@ -636,12 +636,12 @@ class FormTarjeta extends StatelessWidget {
 }
 
 class FormEtiqueta extends StatelessWidget {
-  const FormEtiqueta(this.text, {super.key, this.requerido = false, this.extra, this.extraColor = AppColors.danger});
+  const FormEtiqueta(this.text, {super.key, this.requerido = false, this.extra, this.extraColor});
 
   final String text;
   final bool requerido;
   final String? extra;
-  final Color extraColor;
+  final Color? extraColor; // null = rojo de la app
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -651,18 +651,19 @@ class FormEtiqueta extends StatelessWidget {
             Expanded(
               child: Text.rich(TextSpan(
                 text: text,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text),
-                children: [if (requerido) const TextSpan(text: ' *', style: TextStyle(color: AppColors.danger))],
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text),
+                children: [if (requerido) TextSpan(text: ' *', style: TextStyle(color: AppColors.danger))],
               )),
             ),
             if (extra != null)
-              Text(extra!, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: extraColor)),
+              Text(extra!, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: extraColor ?? AppColors.danger)),
           ],
         ),
       );
 }
 
-const _bordeCampo = OutlineInputBorder(
+// Getter (no constante): el color del borde cambia con el tema claro/oscuro.
+OutlineInputBorder get _bordeCampo => OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(10)),
   borderSide: BorderSide(color: AppColors.border),
 );
@@ -711,19 +712,19 @@ class FormCampo extends StatelessWidget {
         keyboardType: teclado,
         minLines: lineas,
         maxLines: lineas,
-        style: const TextStyle(fontSize: 14, color: AppColors.text),
+        style: TextStyle(fontSize: 14, color: AppColors.text),
         decoration: InputDecoration(
           filled: true,
           fillColor: AppColors.surface,
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+          hintStyle: TextStyle(fontSize: 14, color: AppColors.textMuted),
           prefixIcon: icon == null ? null : Icon(icon, size: 18, color: AppColors.textMuted),
           prefixText: prefijo,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           border: _bordeCampo,
           enabledBorder: _bordeCampo,
-          focusedBorder: _bordeCampo.copyWith(borderSide: const BorderSide(color: AppColors.primary)),
+          focusedBorder: _bordeCampo.copyWith(borderSide: BorderSide(color: AppColors.primary)),
         ),
       );
 }

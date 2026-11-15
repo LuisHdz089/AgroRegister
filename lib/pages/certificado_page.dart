@@ -237,7 +237,7 @@ class _CertificadoPageState extends State<CertificadoPage> {
       ), rancho.value);
       final destinoArchivo = await FilePicker.saveFile(
         dialogTitle: 'Guardar certificado de movilización',
-        fileName: 'certificado_movilizacion_$_folio.pdf',
+        fileName: 'agroregister_certificado_movilizacion_$_folio.pdf',
         bytes: bytes,
         mimeType: 'application/pdf',
       );
@@ -269,7 +269,7 @@ class _CertificadoPageState extends State<CertificadoPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.description_outlined, color: AppColors.primary),
+                  child: Icon(Icons.description_outlined, color: AppColors.primary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -278,12 +278,12 @@ class _CertificadoPageState extends State<CertificadoPage> {
                     children: [
                       Text(
                         rancho.value.nombre,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
                       ),
                       Text(
                         'UPP ${rancho.value.upp} • Folio $_folio',
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                       ),
                     ],
                   ),
@@ -310,8 +310,8 @@ class _CertificadoPageState extends State<CertificadoPage> {
                       value: _motivo,
                       isExpanded: true,
                       isDense: true,
-                      icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.text),
-                      style: const TextStyle(fontSize: 14, color: AppColors.text),
+                      icon: Icon(Icons.keyboard_arrow_down, color: AppColors.text),
+                      style: TextStyle(fontSize: 14, color: AppColors.text),
                       items: [for (final m in motivosMovilizacion) DropdownMenuItem(value: m, child: Text(m))],
                       onChanged: (m) => setState(() => _motivo = m!),
                     ),
@@ -325,7 +325,7 @@ class _CertificadoPageState extends State<CertificadoPage> {
                   child: Row(
                     children: [
                       Expanded(child: Text(fechaCorta(_fecha), style: const TextStyle(fontSize: 14))),
-                      const Icon(Icons.event, size: 18, color: AppColors.text),
+                      Icon(Icons.event, size: 18, color: AppColors.text),
                     ],
                   ),
                 ),
@@ -353,7 +353,7 @@ class _CertificadoPageState extends State<CertificadoPage> {
                     extraColor: AppColors.primary,
                   ),
                   if (activos.isEmpty)
-                    const Text('No hay animales en el ganado', style: TextStyle(color: AppColors.textMuted))
+                    Text('No hay animales en el ganado', style: TextStyle(color: AppColors.textMuted))
                   else
                     Align(
                       alignment: Alignment.centerLeft,
@@ -394,7 +394,7 @@ class _CertificadoPageState extends State<CertificadoPage> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(12)),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(Icons.info_outline, size: 18, color: AppColors.textMuted),

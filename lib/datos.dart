@@ -10,6 +10,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' show sqfliteFfiInit, databaseFactoryFfi;
 
 import 'pages/animales_page.dart';
+import 'pages/legal_page.dart';
 import 'pages/movimientos_page.dart';
 import 'pages/nueva_incidencia_page.dart';
 
@@ -388,3 +389,21 @@ Future<void> cerrarSesion() async {
   await _ponerConfig('sesion', null);
   usuarioActual.value = null;
 }
+
+/// Los datos siguen siendo los de ejemplo de la primera instalación: mismos animales, sin movimientos ni incidencias.
+bool get soloDatosDeEjemplo {
+  String firma(List<Animal> l) => l.map((a) => '${a.codigo}|${a.nombre}|${a.arete}').join(',');
+  return movimientos.value.isEmpty && incidencias.value.isEmpty && firma(animales.value) == firma(animalesEjemplo);
+}
+
+/// Primer registro: guarda los datos del rancho y la aceptación de los términos (fecha y versión).
+/// Si el ganado sigue siendo el de ejemplo, la app empieza vacía; si ya hay datos reales, no se toca nada.
+Future<void> iniciarRanchoNuevo(Rancho r) async {
+  rancho.value = r;
+  if (soloDatosDeEjemplo) animales.value = [];
+  await _ponerConfig('terminos_aceptados', '${DateTime.now().toIso8601String()} (versión $versionLegal)');
+  await guardadoPendiente();
+}
+
+/// Fecha y versión en que se aceptaron los términos y el aviso de privacidad, o null si no hay registro.
+Future<String?> terminosAceptados() => _config('terminos_aceptados');

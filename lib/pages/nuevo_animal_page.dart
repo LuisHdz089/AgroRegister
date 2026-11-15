@@ -125,7 +125,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
         surfaceTintColor: Colors.transparent,
         title: Text(widget.soloDevolver ? 'Datos del animal' : (_e == null ? "Nuevo Registro" : "Editar Registro"),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-        actions: const [
+        actions: [
           Padding(
             padding: EdgeInsets.only(right: 16),
             child: CircleAvatar(
@@ -144,7 +144,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
             child: Stack(
               children: [
                 Positioned.fill(child: FotoAnimal(_foto, size: double.infinity, radius: 16, iconSize: 56)),
-                const Positioned(
+                Positioned(
                   left: 10,
                   bottom: 12,
                   child: Row(
@@ -159,7 +159,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                   right: 10,
                   bottom: 10,
                   child: Material(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(8),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(8),
@@ -167,7 +167,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                         final ruta = await elegirImagen(context);
                         if (ruta != null) setState(() => _foto = ruta);
                       },
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                         child: Row(
                           children: [
@@ -197,7 +197,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
                   child: const Icon(Icons.fingerprint, color: Colors.white, size: 22),
                 ),
                 const SizedBox(width: 12),
@@ -207,7 +207,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                     children: [
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text('Código interno (Automático)',
                                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text)),
                           ),
@@ -225,11 +225,11 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(10)),
                         child: Text(_codigo,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: 1, color: AppColors.primary)),
                       ),
                       const SizedBox(height: 8),
-                      const Text('Identificador único del rancho. Se conserva aunque el animal pierda su arete.',
+                      Text('Identificador único del rancho. Se conserva aunque el animal pierda su arete.',
                           style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
                     ],
                   ),
@@ -239,7 +239,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
           ),
           const SizedBox(height: 12),
           _Seccion(
-            label: const Text.rich(TextSpan(text: 'Especie ', children: [
+            label: Text.rich(TextSpan(text: 'Especie ', children: [
               TextSpan(text: '*', style: TextStyle(color: AppColors.danger)),
             ])),
             child: GridView.count(
@@ -278,13 +278,13 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
             ),
           ),
           _Seccion(
-            label: const Text.rich(TextSpan(text: 'Nombre o apodo ', children: [
+            label: Text.rich(TextSpan(text: 'Nombre o apodo ', children: [
               TextSpan(text: '(opcional)', style: TextStyle(fontWeight: FontWeight.w400, color: AppColors.textMuted)),
             ])),
             child: _Campo(controller: _nombre, icon: Icons.edit_note, hint: 'Ej. Sol, La Pinta, Trueno'),
           ),
           _Seccion(
-            label: const Text.rich(TextSpan(text: 'Sexo ', children: [
+            label: Text.rich(TextSpan(text: 'Sexo ', children: [
               TextSpan(text: '*', style: TextStyle(color: AppColors.danger)),
             ])),
             child: Row(
@@ -326,7 +326,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                       style: TextStyle(fontSize: 14, color: n == null ? AppColors.textMuted : AppColors.text),
                     ),
                   ),
-                  const Icon(Icons.event, size: 18, color: AppColors.text),
+                  Icon(Icons.event, size: 18, color: AppColors.text),
                 ],
               ),
             ),
@@ -340,8 +340,8 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                   value: _raza,
                   isExpanded: true,
                   isDense: true,
-                  icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.text),
-                  style: const TextStyle(fontSize: 14, color: AppColors.text),
+                  icon: Icon(Icons.keyboard_arrow_down, color: AppColors.text),
+                  style: TextStyle(fontSize: 14, color: AppColors.text),
                   items: [for (final r in _opcionesRaza) DropdownMenuItem(value: r, child: Text(r))],
                   onChanged: (r) => setState(() => _raza = r!),
                 ),
@@ -354,7 +354,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                 controller: _color, icon: Icons.palette_outlined, hint: 'Ej. Blanco con manchas negras, cuerno mocho'),
           ),
           _Seccion(
-            label: const Text.rich(TextSpan(text: 'Documento ', children: [
+            label: Text.rich(TextSpan(text: 'Documento ', children: [
               TextSpan(text: '(opcional)', style: TextStyle(fontWeight: FontWeight.w400, color: AppColors.textMuted)),
             ])),
             child: Container(
@@ -362,7 +362,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
               decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
               child: Row(
                 children: [
-                  const Icon(Icons.description_outlined, color: AppColors.primary),
+                  Icon(Icons.description_outlined, color: AppColors.primary),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -379,7 +379,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
                   if (_documento != null)
                     IconButton(
                       tooltip: 'Quitar documento',
-                      icon: const Icon(Icons.delete_outline, color: AppColors.danger),
+                      icon: Icon(Icons.delete_outline, color: AppColors.danger),
                       onPressed: () => setState(() => _documento = null),
                     ),
                   FilledButton(
@@ -401,7 +401,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
             ),
           ),
           const SizedBox(height: 8),
-          const Row(
+          Row(
             children: [
               Icon(Icons.verified_outlined, color: AppColors.primary, size: 22),
               SizedBox(width: 8),
@@ -412,7 +412,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
             ],
           ),
           const SizedBox(height: 2),
-          const Text('Datos para seguimiento sanitario y movilización ganadera.',
+          Text('Datos para seguimiento sanitario y movilización ganadera.',
               style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
           const SizedBox(height: 12),
           _Seccion(
@@ -422,7 +422,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
               children: [
                 _Campo(controller: _arete, icon: Icons.label_outline, hint: 'Ej. Arete: 2592'),
                 const SizedBox(height: 14),
-                const Text('Fierro o marca del rancho',
+                Text('Fierro o marca del rancho',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text)),
                 const SizedBox(height: 8),
                 _Campo(controller: _fierro, icon: Icons.branding_watermark_outlined, hint: 'Marca registrada'),
@@ -432,7 +432,7 @@ class _NuevoAnimalPageState extends State<NuevoAnimalPage> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(12)),
-            child: const Row(
+            child: Row(
               children: [
                 Icon(Icons.info_outline, color: AppColors.textMuted),
                 SizedBox(width: 10),
@@ -485,12 +485,12 @@ class _Seccion extends StatelessWidget {
             children: [
               Expanded(
                 child: DefaultTextStyle.merge(
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.text),
                   child: label,
                 ),
               ),
               if (trailing != null)
-                Text(trailing!, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text)),
+                Text(trailing!, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text)),
             ],
           ),
           const SizedBox(height: 8),
@@ -543,12 +543,12 @@ class _Campo extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      style: const TextStyle(fontSize: 14, color: AppColors.text),
+      style: TextStyle(fontSize: 14, color: AppColors.text),
       decoration: InputDecoration(
         filled: true,
         fillColor: AppColors.background,
         hintText: hint,
-        hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+        hintStyle: TextStyle(fontSize: 14, color: AppColors.textMuted),
         prefixIcon: Icon(icon, size: 18, color: AppColors.textMuted),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 14),

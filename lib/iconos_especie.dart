@@ -5,17 +5,17 @@ import 'theme.dart';
 /// Ícono de línea de la cabeza de cada especie, con el estilo del logo de AgroRegister
 /// (trazo verde redondeado y relleno suave). [especie] es una clave de `especies`.
 class IconoEspecie extends StatelessWidget {
-  const IconoEspecie(this.especie, {super.key, this.size = 24, this.color = AppColors.primary, this.semanticLabel});
+  const IconoEspecie(this.especie, {super.key, this.size = 24, this.color, this.semanticLabel});
 
   final String especie;
   final double size;
-  final Color color;
+  final Color? color; // null = verde de la app (según el tema)
   final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) => Semantics(
         label: semanticLabel,
-        child: CustomPaint(size: Size.square(size), painter: _Cabeza(especie, color)),
+        child: CustomPaint(size: Size.square(size), painter: _Cabeza(especie, color ?? AppColors.primary)),
       );
 }
 
@@ -173,7 +173,7 @@ class _Cabeza extends CustomPainter {
 }
 
 /// Ícono de la especie seguido de un texto en una línea (tarjetas, listas y selectores).
-Widget conIconoEspecie(String especie, Widget texto, {double size = 16, Color color = AppColors.primary}) => Row(
+Widget conIconoEspecie(String especie, Widget texto, {double size = 16, Color? color}) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconoEspecie(especie, size: size, color: color),

@@ -33,15 +33,15 @@ class InicioPage extends StatelessWidget {
       builder: (context, _) {
         final r = ResumenHato(animales.value, movimientos.value, periodoDelMes(DateTime.now()));
         return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          padding: EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
             _Saludo(rancho.value, r.pendientes),
-            const SizedBox(height: 24),
-            const _Seccion('Resumen de hato', accion: 'Actualizado hoy'),
+            SizedBox(height: 24),
+            _Seccion('Resumen de hato', accion: 'Actualizado hoy'),
             _Resumen(r),
-            const SizedBox(height: 24),
-            const _Seccion('Accesos rápidos'),
-            const _Acceso(
+            SizedBox(height: 24),
+            _Seccion('Accesos rápidos'),
+            _Acceso(
               icon: Icons.add,
               iconColor: Colors.white,
               bg: AppColors.primary,
@@ -49,7 +49,7 @@ class InicioPage extends StatelessWidget {
               subtitle: 'Registro con foto, arete y datos',
               destino: NuevoAnimalPage.new,
             ),
-            const _Acceso(
+            _Acceso(
               icon: Icons.swap_horiz,
               iconColor: AppColors.primary,
               bg: AppColors.primarySoft,
@@ -57,7 +57,7 @@ class InicioPage extends StatelessWidget {
               subtitle: 'Ventas, traslados, compras o nacimientos',
               destino: NuevoMovimientoPage.new,
             ),
-            const _Acceso(
+            _Acceso(
               icon: Icons.warning_amber_rounded,
               iconColor: AppColors.warning,
               bg: AppColors.dangerSoft,
@@ -65,7 +65,7 @@ class InicioPage extends StatelessWidget {
               subtitle: 'Pérdida de arete, golpe o tratamiento',
               destino: NuevaIncidenciaPage.new,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _Seccion('Inspección reciente', accion: 'Ver todas →', onAccion: () => pestanaActual.value = 1),
             for (final a in inspeccionReciente(2)) _Animal(a),
           ],
@@ -78,17 +78,17 @@ class InicioPage extends StatelessWidget {
 BoxDecoration _card() =>
     BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), boxShadow: cardShadow);
 
-Widget _chip(String text, {Widget? leading, Color fg = AppColors.primary, Color bg = AppColors.primarySoft}) =>
+Widget _chip(String text, {Widget? leading, Color? fg, Color? bg}) =>
     Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: bg ?? AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           ?leading,
           Text(
             text,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg ?? AppColors.primary),
           ),
         ],
       ),
@@ -112,17 +112,17 @@ class _Saludo extends StatelessWidget {
             children: [
               Text(
                 rancho.nombre.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                   color: AppColors.textMuted,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 'Buen día, ${rancho.saludo} 👋',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.text),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.text),
               ),
             ],
           ),
@@ -134,7 +134,7 @@ class _Saludo extends StatelessWidget {
           leading: Container(
             width: 7,
             height: 7,
-            margin: const EdgeInsets.only(right: 6),
+            margin: EdgeInsets.only(right: 6),
             decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
           ),
         ),
@@ -153,13 +153,13 @@ class _Seccion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
             ),
           ),
           if (accion != null)
@@ -167,10 +167,10 @@ class _Seccion extends StatelessWidget {
               onTap: onAccion,
               borderRadius: BorderRadius.circular(6),
               child: Padding(
-                padding: const EdgeInsets.all(4),
+                padding: EdgeInsets.all(4),
                 child: Text(
                   accion!,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
                 ),
               ),
             ),
@@ -185,7 +185,7 @@ class _Resumen extends StatelessWidget {
 
   final ResumenHato r;
 
-  static const _muted = TextStyle(fontSize: 13, color: AppColors.textMuted);
+  static TextStyle get _muted => TextStyle(fontSize: 13, color: AppColors.textMuted);
 
   @override
   Widget build(BuildContext context) {
@@ -202,13 +202,13 @@ class _Resumen extends StatelessWidget {
             value: Text('${r.total}'),
             footer: Row(
               children: [
-                const Icon(Icons.check_circle_outline, size: 15, color: AppColors.primary),
+                Icon(Icons.check_circle_outline, size: 15, color: AppColors.primary),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     '${r.pct(r.total - r.sinArete)}% con arete',
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
                   ),
                 ),
               ],
@@ -332,7 +332,7 @@ class _Stat extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
               ),
             ),
             Container(
@@ -345,7 +345,7 @@ class _Stat extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         DefaultTextStyle.merge(
-          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.text, height: 1.1),
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.text, height: 1.1),
           child: value,
         ),
         const SizedBox(height: 4),
@@ -399,14 +399,14 @@ class _Acceso extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.text),
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.text),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                        style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                       ),
                     ],
                   ),
@@ -414,8 +414,8 @@ class _Acceso extends StatelessWidget {
                 Container(
                   width: 30,
                   height: 30,
-                  decoration: const BoxDecoration(color: AppColors.background, shape: BoxShape.circle),
-                  child: const Icon(Icons.chevron_right, size: 20, color: AppColors.text),
+                  decoration: BoxDecoration(color: AppColors.background, shape: BoxShape.circle),
+                  child: Icon(Icons.chevron_right, size: 20, color: AppColors.text),
                 ),
               ],
             ),
@@ -457,7 +457,7 @@ class _Animal extends StatelessWidget {
                             child: Text(
                               a.nombre.isEmpty ? a.codigo : '${a.codigo} · ${a.nombre}',
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text),
                             ),
                           ),
                           etiquetaSalida(a) != null
@@ -473,17 +473,17 @@ class _Animal extends StatelessWidget {
                         Text(
                           '${a.sexo} · ${a.raza} · ${a.edad}',
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.sell_outlined, size: 13, color: AppColors.textMuted),
+                          Icon(Icons.sell_outlined, size: 13, color: AppColors.textMuted),
                           const SizedBox(width: 4),
                           Text(
                             a.arete == null ? 'Arete en trámite' : 'Arete #${a.arete}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                           ),
                         ],
                       ),
@@ -491,7 +491,7 @@ class _Animal extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right, color: AppColors.text),
+                Icon(Icons.chevron_right, color: AppColors.text),
               ],
             ),
           ),

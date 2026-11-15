@@ -70,21 +70,21 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     child: Row(
                       children: [
-                        const Icon(Icons.date_range, color: AppColors.primary),
+                        Icon(Icons.date_range, color: AppColors.primary),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Periodo',
+                              Text('Periodo',
                                   style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                               Text('${fechaCorta(_periodo.start)}  –  ${fechaCorta(_periodo.end)}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
                             ],
                           ),
                         ),
-                        const Text('Cambiar',
+                        Text('Cambiar',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
                       ],
                     ),
@@ -96,7 +96,7 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(colors: [AppColors.primary, Color(0xFF2E7D57)]),
+                  gradient: LinearGradient(colors: [AppColors.primary, Color(0xFF2E7D57)]),
                 ),
                 child: Row(
                   children: [
@@ -136,9 +136,9 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.pie_chart_outline, size: 20, color: AppColors.text),
+                        Icon(Icons.pie_chart_outline, size: 20, color: AppColors.text),
                         const SizedBox(width: 8),
-                        const Expanded(
+                        Expanded(
                           child: Text('Distribución General',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
                         ),
@@ -156,8 +156,8 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('${r.total}',
-                                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.text)),
-                              const Text('TOTAL',
+                                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: AppColors.text)),
+                              Text('TOTAL',
                                   style: TextStyle(
                                       fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1, color: AppColors.textMuted)),
                             ],
@@ -173,12 +173,12 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text('Capacidad de potrero',
                               style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.text)),
                         ),
                         Text('${(ocupacion * 100).round()}% ocupación',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.text)),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.text)),
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -196,7 +196,7 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
               ),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text('Ejemplares Destacados',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
                   ),
@@ -219,19 +219,19 @@ class _ResumenMensualPageState extends State<ResumenMensualPage> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.history, size: 20, color: AppColors.text),
+                        Icon(Icons.history, size: 20, color: AppColors.text),
                         const SizedBox(width: 8),
-                        const Expanded(
+                        Expanded(
                           child: Text('Últimos Movimientos',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
                         ),
                         Text('${delMes.length} en el periodo',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
                       ],
                     ),
                     const SizedBox(height: 12),
                     if (delMes.isEmpty)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.all(16),
                         child: Text('Sin movimientos en el periodo', style: TextStyle(color: AppColors.textMuted)),
                       ),
@@ -300,8 +300,8 @@ class _Enlace extends StatelessWidget {
           padding: const EdgeInsets.all(4),
           child: Row(
             children: [
-              Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
-              const Icon(Icons.chevron_right, size: 18, color: AppColors.primary),
+              Text(text, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+              Icon(Icons.chevron_right, size: 18, color: AppColors.primary),
             ],
           ),
         ),
@@ -374,7 +374,7 @@ class _Leyenda extends StatelessWidget {
                     fontSize: 16, fontWeight: FontWeight.w800, color: alerta ? AppColors.danger : AppColors.text)),
             if (pct.isNotEmpty) ...[
               const SizedBox(width: 4),
-              Text(pct, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+              Text(pct, style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
             ],
           ],
         ),
@@ -419,8 +419,8 @@ class _Destacado extends StatelessWidget {
                 children: [
                   Text(a.nombre.isEmpty ? a.codigo : a.nombre,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
-                  Text('${a.codigo} • ${a.sexo}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
+                  Text('${a.codigo} • ${a.sexo}', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                 ],
               ),
             ),
@@ -458,11 +458,11 @@ class _Ultimo extends StatelessWidget {
               children: [
                 Text(e.titulo,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text)),
                 Text('${e.animal.codigo} • ${e.animal.nombre}${extra == null ? '' : ' ($extra)'}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
               ],
             ),
           ),
@@ -471,7 +471,7 @@ class _Ultimo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(fechaCorta(e.fecha),
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.text)),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.text)),
               Text(e.etiqueta, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: e.fg)),
             ],
           ),
