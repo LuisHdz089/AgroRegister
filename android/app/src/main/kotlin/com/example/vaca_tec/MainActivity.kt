@@ -64,6 +64,10 @@ class MainActivity : FlutterActivity() {
                         )
                         result.success(null)
                     }
+                    "quitar" -> {
+                        NotificationManagerCompat.from(this).cancelAll()
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }

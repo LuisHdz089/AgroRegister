@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../datos.dart';
 import '../foto.dart';
+import '../notificaciones_sistema.dart';
 import '../theme.dart';
 import 'animales_page.dart';
 import 'ficha_animal_page.dart';
@@ -60,12 +61,49 @@ List<Aviso> avisosDe(List<Animal> animales, List<Incidencia> incs, DateTime hoy,
 List<Aviso> avisosActuales() =>
     avisosDe(animales.value, incidencias.value, DateTime.now(), avisosActivos.value);
 
+/// Identifica un aviso para saber si ya se vio o ya se notificó.
+String claveAviso(Aviso a) => '${a.tipo}|${a.animal.codigo}|${a.titulo}';
+
+/// Avisos que el usuario todavía no ha visto en esta pantalla (los que cuenta la campana).
+List<Aviso> avisosSinLeer() => [
+      for (final a in avisosActuales())
+        if (!avisosLeidos.value.contains(claveAviso(a))) a,
+    ];
+
+/// Marca como vistos los avisos actuales. Solo guarda los que siguen vigentes: si un aviso se resuelve y
+/// vuelve a aparecer después, cuenta como nuevo otra vez.
+void marcarAvisosLeidos() => avisosLeidos.value = avisosActuales().map(claveAviso).toSet();
+
 /// Todo lo que puede cambiar los avisos.
-final cambiosDeAvisos = Listenable.merge([animales, movimientos, incidencias, avisosActivos]);
+final cambiosDeAvisos = Listenable.merge([animales, movimientos, incidencias, avisosActivos, avisosLeidos]);
 
 // Notificaciones de campo: se abre desde la campana del encabezado y desde el Perfil.
-class NotificacionesPage extends StatelessWidget {
+class NotificacionesPage extends StatefulWidget {
   const NotificacionesPage({super.key});
+
+  @override
+  State<NotificacionesPage> createState() => _NotificacionesPageState();
+}
+
+/// Al abrir la pantalla los avisos quedan leídos (la campana se apaga), pero los que eran nuevos se
+/// siguen marcando como "Nuevo" mientras la pantalla está abierta.
+class _NotificacionesPageState extends State<NotificacionesPage> {
+  late final Set<String> _nuevos;
+
+  @override
+  void initState() {
+    super.initState();
+    _nuevos = avisosSinLeer().map(claveAviso).toSet();
+    // Fuera del build: el contador de la campana escucha este cambio y se redibuja.
+    Future.microtask(marcarAvisosLeidos);
+    quitarNotificaciones(); // ya se vieron aquí: se limpian también de la barra del teléfono
+  }
+
+  @override
+  void dispose() {
+    Future.microtask(marcarAvisosLeidos); // incluye los que aparecieron mientras la pantalla estaba abierta
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +117,7 @@ class NotificacionesPage extends StatelessWidget {
         listenable: cambiosDeAvisos,
         builder: (context, _) {
           final avisos = avisosActuales();
+          final nuevos = avisos.where((a) => _nuevos.contains(claveAviso(a))).length;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
             children: [
@@ -107,9 +146,16 @@ class NotificacionesPage extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
-                child: Text(
-                  avisos.isEmpty ? 'Todo al día' : '${avisos.length} ${avisos.length == 1 ? 'aviso' : 'avisos'}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+                child: Row(
+                  children: [
+                    Text(
+                      avisos.isEmpty ? 'Todo al día' : '${avisos.length} ${avisos.length == 1 ? 'aviso' : 'avisos'}',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text),
+                    ),
+                    if (nuevos > 0)
+                      Text('  •  $nuevos ${nuevos == 1 ? 'nuevo' : 'nuevos'}',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.danger)),
+                  ],
                 ),
               ),
               if (avisos.isEmpty)
@@ -125,7 +171,7 @@ class NotificacionesPage extends StatelessWidget {
                     ],
                   ),
                 ),
-              for (final a in avisos) _AvisoCard(a),
+              for (final a in avisos) _AvisoCard(a, nuevo: _nuevos.contains(claveAviso(a))),
             ],
           );
         },
@@ -150,9 +196,10 @@ class _Tarjeta extends StatelessWidget {
 }
 
 class _AvisoCard extends StatelessWidget {
-  const _AvisoCard(this.aviso);
+  const _AvisoCard(this.aviso, {required this.nuevo});
 
   final Aviso aviso;
+  final bool nuevo;
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +232,25 @@ class _AvisoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(aviso.titulo,
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(aviso.titulo,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.text)),
+                          ),
+                          if (nuevo) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                  color: AppColors.dangerSoft, borderRadius: BorderRadius.circular(6)),
+                              child: Text('Nuevo',
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.danger)),
+                            ),
+                          ],
+                        ],
+                      ),
                       Text('${a.codigo}${a.nombre.isEmpty ? '' : ' • ${a.nombre}'} — ${aviso.detalle}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

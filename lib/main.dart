@@ -149,7 +149,7 @@ class _Header extends StatelessWidget {
           ListenableBuilder(
             listenable: cambiosDeAvisos,
             builder: (context, _) {
-              final n = avisosActuales().length;
+              final n = avisosSinLeer().length; // solo los que no se han visto
               return IconButton(
                 tooltip: 'Notificaciones',
                 onPressed: () =>

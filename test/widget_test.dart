@@ -117,7 +117,9 @@ void main() {
     addTearDown(() {
       tester.binding.setSurfaceSize(null);
       avisosActivos.value = tiposAviso.toSet();
+      avisosLeidos.value = {};
     });
+    avisosLeidos.value = {};
     await tester.pumpWidget(const MiGanadoApp());
     final total = avisosActuales().length;
     expect(total, greaterThan(0));
@@ -125,6 +127,8 @@ void main() {
     await tester.tap(find.byTooltip('Notificaciones'));
     await tester.pumpAndSettle();
     expect(find.text('$total avisos'), findsOneWidget);
+    expect(find.text('Nuevo'), findsNWidgets(total)); // todos eran nuevos al abrir
+    expect(avisosSinLeer(), isEmpty); // al verlos quedan leídos
     expect(find.text('Sin arete SINIIGA'), findsOneWidget); // Torito
 
     await tester.tap(find.text('Aretado'));
@@ -132,6 +136,11 @@ void main() {
     expect(find.text('Sin arete SINIIGA'), findsNothing);
     expect(find.text('${total - 1} avisos'), findsOneWidget);
     expect(avisosActivos.value.contains('Aretado'), isFalse);
+
+    // Al volver, la campana ya no cuenta los avisos vistos.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('${total - 1}'), findsNothing);
   });
 
   testWidgets('animales: filtro por sexo y búsqueda', (tester) async {

@@ -42,6 +42,9 @@ final usuarioActual = ValueNotifier<String?>(null);
 const tiposAviso = ['Vacunas', 'Aretado', 'Tratamientos', 'Pendientes'];
 final avisosActivos = ValueNotifier<Set<String>>(tiposAviso.toSet());
 
+/// Claves de los avisos que el usuario ya vio en la pantalla de notificaciones (ver claveAviso).
+final avisosLeidos = ValueNotifier<Set<String>>({});
+
 late Database _db;
 
 // Las escrituras van en cola para que nunca se mezclen dos reescrituras de la misma tabla.
@@ -215,6 +218,8 @@ Future<void> _cargar() async {
   usuarioActual.value = await _config('sesion');
   final avisos = await _config('avisos'); // lista separada por comas; vacía = ninguno activo
   if (avisos != null) avisosActivos.value = avisos.split(',').where(tiposAviso.contains).toSet();
+  final leidos = await _config('avisos_leidos'); // una clave por línea
+  if (leidos != null && leidos.isNotEmpty) avisosLeidos.value = leidos.split('\n').toSet();
 }
 
 /// Abre la base de datos, la llena la primera vez y guarda cada cambio posterior.
@@ -258,6 +263,7 @@ Future<void> iniciarDatos({String? ruta}) async {
   alCambiar(movimientos, _guardarMovimientos);
   alCambiar(incidencias, _guardarIncidencias);
   alCambiar(avisosActivos, () => _ponerConfig('avisos', avisosActivos.value.join(',')));
+  alCambiar(avisosLeidos, () => _ponerConfig('avisos_leidos', avisosLeidos.value.join('\n')));
 }
 
 /// Los códigos internos pasaron de "VG-###" a "GV-###". Renombra los guardados con el formato anterior

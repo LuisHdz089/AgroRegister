@@ -22,7 +22,8 @@ Future<void> _llamar(String metodo, [Map<String, Object>? args]) async {
 Future<void> _mostrar(int id, String titulo, String texto) =>
     _llamar('mostrar', {'id': id, 'titulo': titulo, 'texto': texto});
 
-String claveAviso(Aviso a) => '${a.tipo}|${a.animal.codigo}|${a.titulo}';
+/// Quita de la barra del teléfono las notificaciones de avisos (cuando ya se vieron en la app).
+Future<void> quitarNotificaciones() => _llamar('quitar');
 
 /// "3 vacunas pendientes • 1 sin arete": cuántos avisos hay de cada tipo.
 String resumenAvisos(List<Aviso> avisos) {
@@ -47,8 +48,9 @@ void iniciarNotificaciones() {
   _iniciado = true;
   _llamar('permiso');
 
-  final iniciales = avisosActuales();
-  final vistos = iniciales.map(claveAviso).toSet();
+  // Al entrar solo se resumen los que el usuario aún no ha visto; los ya leídos no se vuelven a notificar.
+  final iniciales = avisosSinLeer();
+  final vistos = avisosActuales().map(claveAviso).toSet();
   if (iniciales.isNotEmpty) {
     _mostrar(1, 'Tienes ${iniciales.length} ${iniciales.length == 1 ? 'aviso' : 'avisos'} de campo',
         resumenAvisos(iniciales));
